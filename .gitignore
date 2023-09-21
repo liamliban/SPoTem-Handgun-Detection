@@ -6,3 +6,5 @@ hiddenlayer/
 __pycache__
 *.prototxt
 videos/
+images/binary_pose
+keypoints_data.json

@@ -8,8 +8,7 @@ from matplotlib.animation import FuncAnimation
 from src import model
 from src.body import Body
 from src import util
-from src.modules import handregion
-from src.modules import bodykeypoints
+from src.modules import handregion, bodykeypoints, binarypose
 
 # Initialize body estimation model
 body_estimation = Body('model/body_pose_model.pth')
@@ -62,6 +61,7 @@ def process_frame(frame_number):
 
         hand_regions = handregion.extract_hand_regions(keypoints, 0.9)
         handregion.draw_hand_regions(canvas, hand_regions)
+        binarypose.create_binary_pose(keypoints, frame_number, image_folder)
 
         # # cropped_images = []
         # # for hand_region in hand_regions:
