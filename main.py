@@ -8,7 +8,7 @@ from matplotlib.animation import FuncAnimation
 from src import model
 from src.body import Body
 from src import util
-from src.modules import handregion, bodykeypoints, binarypose
+from src.modules import handregion, bodykeypoints, binarypose, handimage
 
 # Initialize body estimation model
 body_estimation = Body('model/body_pose_model.pth')
@@ -30,18 +30,18 @@ def process_frame(frame_number):
 
     # Load the image
     test_image = os.path.join(image_folder, image_file)
-    oriImg = cv2.imread(test_image)  # B,G,R order
+    orig_image = cv2.imread(test_image)  # B,G,R order
 
     # Preprocessing:
     # Resize the image to a target size (e.g., 368x368 pixels)
     target_size = (368, 368)
-    oriImg = cv2.resize(oriImg, target_size)
+    resized_image = cv2.resize(orig_image, target_size)
 
     # Body pose estimation
-    candidate, subset = body_estimation(oriImg)
+    candidate, subset = body_estimation(resized_image)
 
     # Visualize body pose on the image
-    canvas = copy.deepcopy(oriImg)
+    canvas = copy.deepcopy(resized_image)
     canvas = util.draw_bodypose(canvas, candidate, subset)
 
     # Extract keypoints data (coordinates and confidence scores)
@@ -57,23 +57,27 @@ def process_frame(frame_number):
         # plot keypoints
         bodykeypoints.plot_keypoints(canvas,keypoints)
 
+        # add keypoints to keypoints_per_frame list
         keypoints_per_frame['keypoints'].append(keypoints)
 
-        hand_regions = handregion.extract_hand_regions(keypoints, 0.9)
+        # get box coordinates of hand regions
+        hand_intersect_threshold = 0.9
+        hand_regions = handregion.extract_hand_regions(keypoints, hand_intersect_threshold)
+
+        # draw hand regions on canvas
         handregion.draw_hand_regions(canvas, hand_regions)
+
+        # create and save concatenated hand region image
+        hand_image_width = 256
+        handregion_image = handimage.create_hand_image(resized_image, hand_regions, target_size, hand_image_width, frame_number, image_folder)
+
+        # display the hand region image
+        cv2.imshow("hand region image", handregion_image)
+
+        # create and save the binary pose image
         binarypose.create_binary_pose(keypoints, frame_number, image_folder)
 
-        # # cropped_images = []
-        # # for hand_region in hand_regions:
-        # #     # Cropping an image
-        # #     cropped_image = oriImg[max(hand_region[1],0):min(hand_region[3],target_size[0]), max(hand_region[0],0):min(hand_region[2],target_size[0])]
-        # #     cropped_image = cv2.resize(cropped_image,(100,100))
-        # #     cropped_images.append(cropped_image)
-        
-        # # concatenated_cropped = cv2.hconcat(cropped_images)
-        # # # Display concatenated cropped images
-        # # cv2.imshow("cropped", concatenated_cropped)
-        
+
     keypoints_data.append(keypoints_per_frame)
 
     return canvas

@@ -1,6 +1,9 @@
 import cv2
 
 # Main function
+# return:
+# [combined_box] or [boxL, boxR]
+# each box is [x_min,y_min,x_max,y_max] or None
 def extract_hand_regions(keypoints, threshold = 0.9):
     #Keypoints for hand region extraction
     left_wrist = keypoints['keypoints'][4]
