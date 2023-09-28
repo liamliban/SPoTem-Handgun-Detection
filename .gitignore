@@ -7,4 +7,5 @@ __pycache__
 *.prototxt
 videos/
 images/binary_pose
+images/hands_image
 keypoints_data.json
