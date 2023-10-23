@@ -8,13 +8,14 @@ from matplotlib.animation import FuncAnimation
 from src import model
 from src.body import Body
 from src import util
-from src.modules import handregion, bodykeypoints, binarypose, handimage
+from src.modules import handregion, bodykeypoints, handimage
+from src.modules.binarypose import BinaryPose
 
 # Initialize body estimation model
 body_estimation = Body('model/body_pose_model.pth')
 
 # Specify the folder containing the images/frames
-image_folder = 'images/dataset/2'
+image_folder = 'images/dataset/12'
 
 # Get a list of image file names in the folder
 image_files = [f for f in os.listdir(image_folder) if f.endswith('.jpg')]
@@ -75,7 +76,7 @@ def process_frame(frame_number):
         cv2.imshow("hand region image", handregion_image)
 
         # create and save the binary pose image
-        binarypose.create_binary_pose(keypoints, frame_number, image_folder)
+        BinaryPose.create(keypoints, frame_number, image_folder)
 
 
     keypoints_data.append(keypoints_per_frame)
