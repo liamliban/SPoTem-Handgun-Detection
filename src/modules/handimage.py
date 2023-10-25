@@ -4,7 +4,7 @@ import os
 
 # Return concatenated image of hand regions
 # size: 2 x 1 
-def create_hand_image(image, hand_regions, frame_target_size, output_image_width, frame_number, folder_name):
+def create_hand_image(image, hand_regions, frame_target_size, output_image_width, frame_number, person_id, folder_name):
     output_image_size = (output_image_width * 2 , output_image_width)
     hand_image_size = (output_image_width , output_image_width)
     images_list = []
@@ -37,7 +37,7 @@ def create_hand_image(image, hand_regions, frame_target_size, output_image_width
 
     # File Path
     folder_path = f'./images/hands_image/{folder_name.split("/")[-1]}'
-    file_name = f'{folder_path}/hands_{frame_number}.png'
+    file_name = f'{folder_path}/hands_{frame_number}_{person_id}.png'
 
     # Check Directory
     if not os.path.exists(folder_path):

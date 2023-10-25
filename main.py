@@ -70,7 +70,8 @@ def process_frame(frame_number):
 
         # create and save concatenated hand region image
         hand_image_width = 256
-        handregion_image = handimage.create_hand_image(resized_image, hand_regions, target_size, hand_image_width, frame_number, image_folder)
+        # hand image filename : hands_{frame_number}_{person_id}.png
+        handregion_image = handimage.create_hand_image(resized_image, hand_regions, target_size, hand_image_width, frame_number, person_id, image_folder)
 
         # display the hand region image
         cv2.imshow("hand region image", handregion_image)
