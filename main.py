@@ -77,7 +77,7 @@ def process_frame(frame_number):
         cv2.imshow("hand region image", handregion_image)
 
         # create and save the binary pose image
-        BinaryPose.create(keypoints, frame_number, image_folder)
+        BinaryPose.createBinaryPose(keypoints, frame_number, image_folder)
 
 
     keypoints_data.append(keypoints_per_frame)

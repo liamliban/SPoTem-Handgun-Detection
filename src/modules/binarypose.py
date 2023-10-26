@@ -7,19 +7,23 @@ import os
 class BinaryPose:
     prev_x0, prev_y0 = None, None
     prev_x1, prev_y1 = None, None
+    neck_dist = None
 
     @classmethod
-    def create(cls, keypoints, frame_number, folder_name):
+    def normalize(keypoints): # returns normalized pose keypoints (returns none if cannot be normalized)
         kp = keypoints['keypoints']
 
-        # Normalize keypoints
+        # Normalize keypoints based on neck & lumbar
         x0, y0 = kp[0]['x'], kp[0]['y']
         x1, y1 = kp[1]['x'], kp[1]['y']
 
-        if x0 is None:
-            if cls.prev_x0 or cls.prev_x1 is None: return
-            x0 = cls.prev_x0
-            y0 = cls.prev_y0
+        prev = False
+
+        if x0 is None or x1 is None:
+            if cls.prev_x0 or cls.prev_x1 is None: return None # IF AT LEAST ONE PREV KEYPOINT IS MISSING DO NOT CREATE IMAGE
+            x0, y0 = cls.prev_x0, cls.prev_y0
+            x1, y1 = cls.prev_x1, cls.prev_y1
+            prev = True
 
         cls.prev_x0 = x0
         cls.prev_y0 = y0
@@ -27,11 +31,21 @@ class BinaryPose:
         cls.prev_y1 = y1
 
         neck_dist = math.sqrt(pow(x1 - x0, 2) + pow(y1 - y0, 2))
+        print("NECK NORMALIZATION", neck_dist)
 
         for i in kp:
             if i['x'] is None or i['y'] is None: continue
             i['x'] = (i['x'] - x0) / neck_dist
             i['y'] = (i['y'] - y0) / neck_dist
+        
+        return kp
+
+    @classmethod
+    def createBinaryPose(cls, keypoints, frame_number, folder_name):
+
+        kp = cls.normalize(keypoints)
+
+        if kp is None: return
 
         # create image PIL 
         image = Image.new('1', (512, 512), 0) # binary, size, background
@@ -44,7 +58,7 @@ class BinaryPose:
         line_thickness = 4
         
         # stickman scale
-        scale = 10
+        scale = 2 * neck_dist # will experiment more on this
 
         # custom function to check if keypoint is missing
         def draw_line(x1,y1,x2,y2):
