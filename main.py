@@ -20,7 +20,7 @@ body_estimation = Body('model/body_pose_model.pth')
 model = models.load_model("yolov3.cfg", "yolov3.weights")
 
 # Specify the folder containing the images/frames
-image_folder = 'images/dataset/12'
+image_folder = 'images/dataset/5'
 
 # Get a list of image file names in the folder
 image_files = [f for f in os.listdir(image_folder) if f.endswith('.jpg')]
@@ -57,8 +57,9 @@ def process_frame(frame_number):
     }
 
     for person_id in range(len(subset)):
+        confidence_min = 0.1
         # extract keypoints dictionary (person_id,keypoints)
-        keypoints = bodykeypoints.extract_keypoints(person_id, candidate, subset)
+        keypoints = bodykeypoints.extract_keypoints(person_id, candidate, subset, confidence_min)
 
         # plot keypoints
         bodykeypoints.plot_keypoints(canvas,keypoints)
@@ -110,7 +111,7 @@ def process_frame(frame_number):
         conv81.register_forward_hook(get_activation('conv_81'))
 
         # Forward pass the image through the model
-        output = model(img)
+        output = model(img.cuda())
 
         # Print the conv_81 layer activation
         print("CONV 81 LAYER")

@@ -2,14 +2,14 @@ import cv2
 from src.modules import handregion
 
 # return keypoints dictionary (person_id,keypoints) for one person and plot keypoints
-def extract_keypoints(person_id, candidate, subset):
+def extract_keypoints(person_id, candidate, subset, confidence_min=0):
     keypoints = {
             'person_id': person_id,
             'keypoints': []
         }
     for kp_id in range(18):  # 18 keypoints for body
         index = int(subset[person_id][kp_id])
-        if not(index == -1): #if keypoint is detected, store coordiantes and confidence score
+        if (not(index == -1)) and candidate[index, 2] >= confidence_min: #if keypoint is detected and confidence score is good, store coordiantes and confidence score
             x = int(candidate[index, 0])
             y = int(candidate[index, 1])
             confidence = candidate[index, 2]
