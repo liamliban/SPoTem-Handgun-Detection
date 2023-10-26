@@ -30,7 +30,7 @@ class BinaryPose:
         cls.prev_x1 = x1
         cls.prev_y1 = y1
 
-        neck_dist = math.sqrt(pow(x1 - x0, 2) + pow(y1 - y0, 2))
+        cls.neck_dist = math.sqrt(pow(x1 - x0, 2) + pow(y1 - y0, 2))
         print("NECK NORMALIZATION", neck_dist)
 
         for i in kp:
@@ -57,7 +57,7 @@ class BinaryPose:
         line_thickness = 4
         
         # stickman scale
-        scale = 2 * neck_dist # will experiment more on this
+        scale = 2 * cls.neck_dist # will experiment more on this
 
         # custom function to check if keypoint is missing
         def draw_line(x1,y1,x2,y2):
