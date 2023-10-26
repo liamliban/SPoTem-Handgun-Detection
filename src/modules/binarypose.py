@@ -31,12 +31,12 @@ class BinaryPose:
         cls.prev_y1 = y1
 
         cls.neck_dist = math.sqrt(pow(x1 - x0, 2) + pow(y1 - y0, 2))
-        print("NECK NORMALIZATION", neck_dist)
+        print("NECK NORMALIZATION", cls.neck_dist)
 
         for i in kp:
             if i['x'] is None or i['y'] is None: continue
-            i['x'] = (i['x'] - x0) / neck_dist
-            i['y'] = (i['y'] - y0) / neck_dist
+            i['x'] = (i['x'] - x0) / cls.neck_dist
+            i['y'] = (i['y'] - y0) / cls.neck_dist
         
         return kp
 
