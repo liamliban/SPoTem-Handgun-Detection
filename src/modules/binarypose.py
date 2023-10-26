@@ -9,8 +9,8 @@ class BinaryPose:
     prev_x1, prev_y1 = None, None
     neck_dist = None
 
-    @classmethod
-    def normalize(keypoints): # returns normalized pose keypoints (returns none if cannot be normalized)
+    @classmethod # use BinaryPose.normalize(<keypoints>)
+    def normalize(cls, keypoints): # returns normalized pose keypoints (returns none if cannot be normalized)
         kp = keypoints['keypoints']
 
         # Normalize keypoints based on neck & lumbar
@@ -42,9 +42,8 @@ class BinaryPose:
 
     @classmethod
     def createBinaryPose(cls, keypoints, frame_number, folder_name):
-
         kp = cls.normalize(keypoints)
-
+        
         if kp is None: return
 
         # create image PIL 
@@ -99,7 +98,7 @@ class BinaryPose:
 
         # File Path
         folder_path = f'./images/binary_pose/{folder_name.split("/")[-1]}'
-        file_name = f'{folder_path}/pose_{frame_number}.png'
+        file_name = f'{folder_path}/pose_{frame_number}_{keypoints["person_id"]}.png'
 
         # Check Directory
         if not os.path.exists(folder_path):
