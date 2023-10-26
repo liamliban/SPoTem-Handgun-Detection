@@ -9,10 +9,15 @@ from src import model
 from src.body import Body
 from src import util
 from src.modules import handregion, bodykeypoints, handimage
+from yolo.pytorchyolo import detect, models
+import torchvision.transforms as transforms
 from src.modules.binarypose import BinaryPose
 
 # Initialize body estimation model
 body_estimation = Body('model/body_pose_model.pth')
+
+# Load the YOLO model
+model = models.load_model("yolov3.cfg", "yolov3.weights")
 
 # Specify the folder containing the images/frames
 image_folder = 'images/dataset/12'
@@ -35,7 +40,7 @@ def process_frame(frame_number):
 
     # Preprocessing:
     # Resize the image to a target size (e.g., 368x368 pixels)
-    target_size = (368, 368)
+    target_size = (416, 416)
     resized_image = cv2.resize(orig_image, target_size)
 
     # Body pose estimation
@@ -70,9 +75,47 @@ def process_frame(frame_number):
 
         # create and save concatenated hand region image
         hand_image_width = 256
+        
         # hand image filename : hands_{frame_number}_{person_id}.png
-        handregion_image = handimage.create_hand_image(resized_image, hand_regions, target_size, hand_image_width, frame_number, person_id, image_folder)
+        handregion_image, file_name = handimage.create_hand_image(resized_image, hand_regions, target_size, hand_image_width, frame_number, person_id, image_folder)
 
+        # Load the image as a numpy array
+        img = cv2.imread(file_name)
+        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+
+        img = cv2.resize(img, target_size)
+
+        # Convert the image to a PyTorch tensor
+        img = transforms.ToTensor()(img)
+
+        # Add a batch dimension to the tensor
+        img = img.unsqueeze(0)
+
+        # Set the model to evaluation mode
+        model.eval()
+
+        # Get the conv_81 layer
+        conv81 = model.module_list[81]
+
+        # Create a dictionary to store the activations
+        activation = {}
+
+        # Define a forward hook to capture the activation of the conv_81 layer
+        def get_activation(name):
+            def hook(model, input, output):
+                activation[name] = output.detach()
+            return hook
+
+        # Register the forward hook on the conv_81 layer
+        conv81.register_forward_hook(get_activation('conv_81'))
+
+        # Forward pass the image through the model
+        output = model(img)
+
+        # Print the conv_81 layer activation
+        print("CONV 81 LAYER")
+        print(activation['conv_81'])
+        
         # display the hand region image
         cv2.imshow("hand region image", handregion_image)
 

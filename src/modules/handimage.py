@@ -49,6 +49,6 @@ def create_hand_image(image, hand_regions, frame_target_size, output_image_width
     # Print Log
     print(f'Hands Image Save in: {file_name}')
 
-    return concatenated_cropped
+    return concatenated_cropped, file_name
 
 
