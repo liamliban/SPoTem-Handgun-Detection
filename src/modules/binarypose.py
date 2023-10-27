@@ -116,4 +116,4 @@ class BinaryPose:
         print(f'Binary Pose Image Save in: {file_name}')
 
         keypoints['keypoints'] = kp # save the normalized pose keypoints
-        return keypoints
+        return keypoints, file_name

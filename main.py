@@ -12,6 +12,7 @@ from src.modules import handregion, bodykeypoints, handimage
 from yolo.pytorchyolo import detect, models
 import torchvision.transforms as transforms
 from src.modules.binarypose import BinaryPose
+from src.modules.posecnn import poseCNN
 
 # Initialize body estimation model
 body_estimation = Body('model/body_pose_model.pth')
@@ -83,10 +84,10 @@ def process_frame(frame_number):
         hand_image_width = 256
         
         # hand image filename : hands_{frame_number}_{person_id}.png
-        handregion_image, file_name = handimage.create_hand_image(resized_image, hand_regions, target_size, hand_image_width, frame_number, person_id, image_folder)
+        handregion_image, hand_file_name = handimage.create_hand_image(resized_image, hand_regions, target_size, hand_image_width, frame_number, person_id, image_folder)
 
         # Load the image as a numpy array
-        img = cv2.imread(file_name)
+        img = cv2.imread(hand_file_name)
         img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
 
         img = cv2.resize(img, target_size)
@@ -119,17 +120,32 @@ def process_frame(frame_number):
         output = model(img.cuda())
 
         # Print the conv_81 layer activation
-        print("CONV 81 LAYER")
+        print("CONV 81 LAYER FOR FILE NAME: ", hand_file_name)
         print(activation['conv_81'])
         
         # display the hand region image
         cv2.imshow("hand region image", handregion_image)
 
         # create and save the binary pose image
-        normalized_keypoints = BinaryPose.createBinaryPose(keypoints, frame_number, image_folder)
+        normalized_keypoints, binary_file_name = BinaryPose.createBinaryPose(keypoints, frame_number, image_folder)
 
         # add normalized keypoints to normalized_keypoints_per_frame list
         normalized_keypoints_per_frame['keypoints'].append(normalized_keypoints)
+
+        # Instantiate CNN model for Binary Pose Images
+        cnn = poseCNN()
+        preprocess = transforms.Compose([ transforms.ToTensor() ])
+        image = cv2.imread(binary_file_name, cv2.IMREAD_GRAYSCALE)
+        input_image = preprocess(image)
+        input_image = input_image.unsqueeze(0)
+        fmap, gap = cnn(input_image)
+
+        # PRINT OUT FEATURE MAP TO TEST IF READING THE RIGHT FILE. VERY LENGTHY SO COMMENT OUT IF NOT NEEDED
+        print(f"Processing {binary_file_name} - Conv2d_3 Feature Map: {fmap}, GAP Feature Map: {gap}")
+
+        # USE fmap TO USE FEATURE MAP FROM conv2d_3
+        # USE gap TO USE FLATTENED FEATURE MAP FROM GlobalAveragePooling2d_1
+
 
     keypoints_data.append(keypoints_per_frame)
     normalized_keypoints_data.append(normalized_keypoints_per_frame)
