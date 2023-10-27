@@ -9,3 +9,4 @@ videos/
 images/binary_pose
 images/hands_image
 keypoints_data.json
+normalized_keypoints_data.json

@@ -28,6 +28,7 @@ image_files.sort()  # Sort the files to ensure the correct order
 
 # Initialize a list to store the keypoints data (sequence)
 keypoints_data = []
+normalized_keypoints_data = []
 
 # Function to load and process an image frame
 def process_frame(frame_number):
@@ -52,6 +53,10 @@ def process_frame(frame_number):
 
     # Extract keypoints data (coordinates and confidence scores)
     keypoints_per_frame = {
+        'frame_number': frame_number,
+        'keypoints': []
+    }
+    normalized_keypoints_per_frame = {
         'frame_number': frame_number,
         'keypoints': []
     }
@@ -121,10 +126,13 @@ def process_frame(frame_number):
         cv2.imshow("hand region image", handregion_image)
 
         # create and save the binary pose image
-        BinaryPose.createBinaryPose(keypoints, frame_number, image_folder)
+        normalized_keypoints = BinaryPose.createBinaryPose(keypoints, frame_number, image_folder)
 
+        # add normalized keypoints to normalized_keypoints_per_frame list
+        normalized_keypoints_per_frame['keypoints'].append(normalized_keypoints)
 
     keypoints_data.append(keypoints_per_frame)
+    normalized_keypoints_data.append(normalized_keypoints_per_frame)
 
     return canvas
 
@@ -148,5 +156,10 @@ plt.show()
 output_json_file = 'keypoints_data.json'
 with open(output_json_file, 'w') as json_file:
     json.dump(keypoints_data, json_file, indent=4)
+
+# Save the normalized keypoints data to a JSON file
+output_json_file = 'normalized_keypoints_data.json'
+with open(output_json_file, 'w') as json_file:
+    json.dump(normalized_keypoints_data, json_file, indent=4)
 
 print(f"Keypoints data saved to {output_json_file}")

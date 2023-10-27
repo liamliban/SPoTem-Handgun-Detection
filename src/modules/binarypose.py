@@ -1,7 +1,7 @@
 from PIL import Image, ImageDraw
 import math
 import os
-
+import copy
 
 
 class BinaryPose:
@@ -10,8 +10,12 @@ class BinaryPose:
     neck_dist = None
 
     @classmethod # use BinaryPose.normalize(<keypoints>)
-    def normalize(cls, keypoints): # returns normalized pose keypoints (returns none if cannot be normalized)
-        kp = keypoints['keypoints']
+    def normalize(cls, orig_keypoints, copy=True): # returns normalized pose keypoints (returns none if cannot be normalized) (copies dictionary by default)
+
+        if copy:
+            kp = copy.deepcopy(orig_keypoints['keypoints']) # copy the keypoints so that orig values won't be affected
+        else:
+            kp = orig_keypoints['keypoints']
 
         # Normalize keypoints based on neck & lumbar
         x0, y0 = kp[0]['x'], kp[0]['y']
@@ -41,8 +45,9 @@ class BinaryPose:
         return kp
 
     @classmethod
-    def createBinaryPose(cls, keypoints, frame_number, folder_name):
-        kp = cls.normalize(keypoints)
+    def createBinaryPose(cls, orig_keypoints, frame_number, folder_name):
+        keypoints = copy.deepcopy(orig_keypoints) 
+        kp = cls.normalize(keypoints, copy=False) # no need to copy because we already copied
         
         if kp is None: return
 
@@ -109,3 +114,6 @@ class BinaryPose:
 
         # Print Log
         print(f'Binary Pose Image Save in: {file_name}')
+
+        keypoints['keypoints'] = kp # save the normalized pose keypoints
+        return keypoints
