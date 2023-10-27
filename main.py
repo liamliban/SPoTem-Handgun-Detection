@@ -157,6 +157,8 @@ output_json_file = 'keypoints_data.json'
 with open(output_json_file, 'w') as json_file:
     json.dump(keypoints_data, json_file, indent=4)
 
+print(f"Keypoints data saved to {output_json_file}")
+
 # Save the normalized keypoints data to a JSON file
 output_json_file = 'normalized_keypoints_data.json'
 with open(output_json_file, 'w') as json_file:
