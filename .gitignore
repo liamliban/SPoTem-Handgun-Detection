@@ -13,3 +13,4 @@ normalized_keypoints_data.json
 darknet53.conv.74
 download_weights.sh
 yolo/weights/
+yolo/data/
