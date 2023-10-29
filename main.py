@@ -4,6 +4,7 @@ import json
 import numpy as np
 import copy
 import matplotlib.pyplot as plt
+import torch
 from matplotlib.animation import FuncAnimation
 from src import model
 from src.body import Body
@@ -127,6 +128,8 @@ def process_frame(frame_number):
         conv81.register_forward_hook(get_activation('conv_81'))
 
         # Forward pass the image through the model
+        if torch.cuda.is_available():
+            img = img.cuda()
         output = model(img)
 
         # Print the conv_81 layer activation
