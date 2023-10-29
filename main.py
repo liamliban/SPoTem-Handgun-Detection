@@ -90,7 +90,17 @@ def process_frame(frame_number):
         img = cv2.imread(hand_file_name)
         img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
 
-        img = cv2.resize(img, target_size)
+        # Pad the image to 416x416 without distorting it
+        original_height, original_width = img.shape[:2]
+        padding_height = max(target_size[0] - original_height, 0)
+        padding_width = max(target_size[1] - original_width, 0)
+        top = padding_height // 2
+        bottom = padding_height - top
+        left = padding_width // 2
+        right = padding_width - left
+        padded_img = cv2.copyMakeBorder(img, top, bottom, left, right, cv2.BORDER_CONSTANT, value=(0, 0, 0))
+
+        cv2.imshow("Image Inputted to YOLOv3", padded_img)
 
         # Convert the image to a PyTorch tensor
         img = transforms.ToTensor()(img)
@@ -117,7 +127,7 @@ def process_frame(frame_number):
         conv81.register_forward_hook(get_activation('conv_81'))
 
         # Forward pass the image through the model
-        output = model(img.cuda())
+        output = model(img)
 
         # Print the conv_81 layer activation
         print("CONV 81 LAYER FOR FILE NAME: ", hand_file_name)
