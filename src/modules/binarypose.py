@@ -49,7 +49,7 @@ class BinaryPose:
         keypoints = copy.deepcopy(orig_keypoints) 
         kp = cls.normalize(keypoints, copy=False) # no need to copy because we already copied
         
-        if kp is None: return
+        if kp is None: return None, None
 
         # create image PIL 
         image = Image.new('1', (512, 512), 0) # binary, size, background

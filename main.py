@@ -21,7 +21,7 @@ body_estimation = Body('model/body_pose_model.pth')
 model = models.load_model("yolov3.cfg", "yolov3.weights")
 
 # Specify the folder containing the images/frames
-image_folder = 'images/dataset/5'
+image_folder = 'images/dataset/11'
 
 # Get a list of image file names in the folder
 image_files = [f for f in os.listdir(image_folder) if f.endswith('.jpg')]
@@ -132,19 +132,20 @@ def process_frame(frame_number):
         # add normalized keypoints to normalized_keypoints_per_frame list
         normalized_keypoints_per_frame['keypoints'].append(normalized_keypoints)
 
-        # Instantiate CNN model for Binary Pose Images
-        cnn = poseCNN()
-        preprocess = transforms.Compose([ transforms.ToTensor() ])
-        image = cv2.imread(binary_file_name, cv2.IMREAD_GRAYSCALE)
-        input_image = preprocess(image)
-        input_image = input_image.unsqueeze(0)
-        fmap, gap = cnn(input_image)
+        if binary_file_name is not None:
+            # Instantiate CNN model for Binary Pose Images
+            cnn = poseCNN()
+            preprocess = transforms.Compose([ transforms.ToTensor() ])
+            image = cv2.imread(binary_file_name, cv2.IMREAD_GRAYSCALE)
+            input_image = preprocess(image)
+            input_image = input_image.unsqueeze(0)
+            fmap, gap = cnn(input_image)
 
-        # PRINT OUT FEATURE MAP TO TEST IF READING THE RIGHT FILE. VERY LENGTHY SO COMMENT OUT IF NOT NEEDED
-        print(f"Processing {binary_file_name} - Conv2d_3 Feature Map: {fmap}, GAP Feature Map: {gap}")
+            # PRINT OUT FEATURE MAP TO TEST IF READING THE RIGHT FILE. VERY LENGTHY SO COMMENT OUT IF NOT NEEDED
+            print(f"Processing {binary_file_name} - Conv2d_3 Feature Map: {fmap}, GAP Feature Map: {gap}")
 
-        # USE fmap TO USE FEATURE MAP FROM conv2d_3
-        # USE gap TO USE FLATTENED FEATURE MAP FROM GlobalAveragePooling2d_1
+            # USE fmap TO USE FEATURE MAP FROM conv2d_3
+            # USE gap TO USE FLATTENED FEATURE MAP FROM GlobalAveragePooling2d_1
 
 
     keypoints_data.append(keypoints_per_frame)
