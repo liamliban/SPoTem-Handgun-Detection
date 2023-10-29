@@ -19,7 +19,7 @@ from src.modules.posecnn import poseCNN
 body_estimation = Body('model/body_pose_model.pth')
 
 # Load the YOLO model
-model = models.load_model("yolov3.cfg", "yolov3.weights")
+model = models.load_model("yolo/config/yolov3.cfg", "yolo/weights/yolov3.weights")
 
 # Specify the folder containing the images/frames
 image_folder = 'images/dataset/11'
