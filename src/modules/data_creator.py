@@ -12,7 +12,7 @@ from src.modules.binarypose import BinaryPose
 # total number of person in video
 total_num_person = 0
 
-# total number of person in video
+# total number of frames in video
 num_frames = 0
 
 # create the following data for a video:
