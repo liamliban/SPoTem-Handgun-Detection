@@ -50,7 +50,6 @@ def _get_normalized(normalized_keypoints, person_id, null_value):
                 # print("keypoint set if no: " , keypoint_set)
 
             keypoint_sequences.append(keypoint_set)
-        print("motion keypoints sequences / frames : " , len(keypoint_sequences))
     return keypoint_sequences
 
 # takes a keypoints_sequence and save it into a text file

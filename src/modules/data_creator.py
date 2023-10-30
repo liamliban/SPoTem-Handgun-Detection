@@ -157,19 +157,19 @@ def create_data(dataset_folder, video_label, data_folder, display_animation = Fa
 
     print("total num person: " , total_num_person)
 
-    print("keypoints test")
-    for frame in keypoints_data:
-        print("\tframe num : ", frame.get("frame_number"))
-        for person in frame.get("keypoints"):
-            print("\t\tperson id : ", person.get("person_id"))
-            print("\t\tkps length : ", len(person.get("keypoints")))
+    # print("keypoints test")
+    # for frame in keypoints_data:
+    #     print("\tframe num : ", frame.get("frame_number"))
+    #     for person in frame.get("keypoints"):
+    #         print("\t\tperson id : ", person.get("person_id"))
+    #         print("\t\tkps length : ", len(person.get("keypoints")))
 
-    print("normalized keypoints test")
-    for frame in normalized_keypoints_data:
-        print("\tframe num : ", frame.get("frame_number"))
-        for person in frame.get("keypoints"):
-            print("\t\tperson id : ", person.get("person_id"))
-            print("\t\tkps length : ", len(person.get("keypoints")))
+    # print("normalized keypoints test")
+    # for frame in normalized_keypoints_data:
+    #     print("\tframe num : ", frame.get("frame_number"))
+    #     for person in frame.get("keypoints"):
+    #         print("\t\tperson id : ", person.get("person_id"))
+    #         print("\t\tkps length : ", len(person.get("keypoints")))
 
     # create motion preprocessed data txt file for each person in video
     motion_folder = output_folder + "motion_keypoints/"

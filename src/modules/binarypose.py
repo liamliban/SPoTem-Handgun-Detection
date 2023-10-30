@@ -11,8 +11,8 @@ class BinaryPose:
 
     @classmethod # use BinaryPose.normalize(<keypoints>)
     def normalize(cls, orig_keypoints, copy=True): # returns normalized pose keypoints (returns none if cannot be normalized) (copies dictionary by default)
-        print("Normalize Method: ")
-        print("\tprev x0: " , cls.prev_x0," prev y0: " , cls.prev_y0," prev x1: " , cls.prev_x1," prev y1: " , cls.prev_y1,)
+        # print("Normalize Method: ")
+        # print("\tprev x0: " , cls.prev_x0," prev y0: " , cls.prev_y0," prev x1: " , cls.prev_x1," prev y1: " , cls.prev_y1,)
 
         if copy:
             kp = copy.deepcopy(orig_keypoints['keypoints']) # copy the keypoints so that orig values won't be affected

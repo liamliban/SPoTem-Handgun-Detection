@@ -1,6 +1,7 @@
 import cv2
 import os
 import torch
+import shutil
 import src.modules.data_creator as data_creator
 from src import model
 from src.modules import motion_analysis
@@ -13,7 +14,7 @@ print("Device: " , device)
 
 # Choose dataset
 dataset_folder = 'images/dataset/'
-video_label = "8"
+video_label = "5"
 
 # Folder where data are stored
 #   -gun: data/[video_label]/hand_image/[person_id]/
@@ -31,8 +32,16 @@ data_folder = f'./data/'
 #   -binary pose image (pose), 
 #   -preprocessed keypoints text file (motion)
 display_animation = False
-num_frames, num_person = data_creator.create_data(dataset_folder, video_label, data_folder, display_animation)
+# Path of output video folder
+output_folder = data_folder + video_label + "/"
 
+# Clear folder first
+if os.path.exists(output_folder):
+    for filename in os.listdir(output_folder):
+        if os.path.exists(os.path.join(output_folder, filename)):
+            shutil.rmtree(output_folder, filename)
+
+num_frames, num_person = data_creator.create_data(dataset_folder, video_label, data_folder, display_animation)
 
 
 # Folders of data
