@@ -4,7 +4,7 @@ import os
 
 # Return concatenated image of hand regions
 # size: 2 x 1 
-def create_hand_image(image, hand_regions, frame_target_size, output_image_width, frame_number, person_id, folder_name):
+def create_hand_image(image, hand_regions, frame_target_size, output_image_width, frame_number, person_id, folder_path):
     output_image_size = (output_image_width * 2 , output_image_width)
     hand_image_size = (output_image_width , output_image_width)
     images_list = []
@@ -36,8 +36,8 @@ def create_hand_image(image, hand_regions, frame_target_size, output_image_width
     concatenated_cropped = cv2.resize(concatenated_cropped , output_image_size)
 
     # File Path
-    folder_path = f'./images/hands_image/{folder_name.split("/")[-1]}'
-    file_name = f'{folder_path}/hands_{frame_number}_{person_id}.png'
+    folder_path = f'{folder_path}{person_id}/'
+    file_name = f'{folder_path}/hands_{frame_number}.png'
 
     # Check Directory
     if not os.path.exists(folder_path):

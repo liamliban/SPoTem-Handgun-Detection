@@ -11,6 +11,8 @@ class BinaryPose:
 
     @classmethod # use BinaryPose.normalize(<keypoints>)
     def normalize(cls, orig_keypoints, copy=True): # returns normalized pose keypoints (returns none if cannot be normalized) (copies dictionary by default)
+        print("Normalize Method: ")
+        print("\tprev x0: " , cls.prev_x0," prev y0: " , cls.prev_y0," prev x1: " , cls.prev_x1," prev y1: " , cls.prev_y1,)
 
         if copy:
             kp = copy.deepcopy(orig_keypoints['keypoints']) # copy the keypoints so that orig values won't be affected
@@ -45,7 +47,7 @@ class BinaryPose:
         return kp
 
     @classmethod
-    def createBinaryPose(cls, orig_keypoints, frame_number, folder_name):
+    def createBinaryPose(cls, orig_keypoints, frame_number, folder_path):
         keypoints = copy.deepcopy(orig_keypoints) 
         kp = cls.normalize(keypoints, copy=False) # no need to copy because we already copied
         
@@ -102,8 +104,8 @@ class BinaryPose:
         draw_line(kp[17]['x'], kp[17]['y'], kp[16]['x'], kp[16]['y'])
 
         # File Path
-        folder_path = f'./images/binary_pose/{folder_name.split("/")[-1]}'
-        file_name = f'{folder_path}/pose_{frame_number}_{keypoints["person_id"]}.png'
+        folder_path = f'{folder_path}{keypoints["person_id"]}/'
+        file_name = f'{folder_path}pose_{frame_number}.png'
 
         # Check Directory
         if not os.path.exists(folder_path):

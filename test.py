@@ -1,48 +1,40 @@
-import cv2
-import os
-import json
 import numpy as np
-import copy
-import matplotlib.pyplot as plt
-from matplotlib.animation import FuncAnimation
 from src import model
-from src.body import Body
-from src import util
-from src.modules import handregion, bodykeypoints, handimage
-from src.modules.binarypose import BinaryPose
-from yolo.pytorchyolo import detect, models
-import torchvision.transforms as transforms
+from src.modules import motion_analysis, motion_preprocess
+import torch
+import torch.nn as nn
 
-# Initialize body estimation model
-body_estimation = Body('model/body_pose_model.pth')
+device = 'cuda:0' if torch.cuda.is_available() else 'cpu'
 
-# Load the YOLO model
-model = models.load_model(
-  "yolov3.cfg", "yolov3.weights")
+keypoints_file_path = "normalized_keypoints_data.json"
+video_label = "test"
+person_id = 0
 
+# get path of text file containing preprocessed data (specified by video and person id)
+data_path = motion_preprocess.preprocess_data(keypoints_file_path, video_label, person_id)
 
-# Load the image as a numpy array
-img = cv2.imread("images/dataset/3/CA00072.jpg")
-img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-#print(img.shape)
-# img = np.einsum('ijk->kij', img)
-print(img.shape)
-img = transforms.ToTensor()(img)
-#img = img.permute(1, 2, 0)
-print(img.size())
-img = img.unsqueeze(0)
-print(img.size()) 
-print(img)
+window_size = 3
+data = motion_analysis.load_data(data_path, window_size)
+frame_num = 2 #not less than window_size - 1
+if frame_num < window_size - 1:
+    print("Motion Analysis: Not enough previous frames. No feature extracted")
+else:
+  data = data[frame_num - (window_size - 1)].unsqueeze(0) #get one sequence only
+  print(data)
 
-#activation = {}
-#def get_activation(name):
-#    def hook(model, input, output):
-#        activation[name] = output.detach()
-#    return hook
-#model.fc3.register_forward_hook(get_activation('fc3'))
-#output = model(x)
-#activation['fc3']
+  # Define the model and specify hyperparameters
+  input_size = 36
+  hidden_size = 64
+  num_layers = 1
+  output_size = 1
 
-#print(model.forward)
-model.eval()
-print(model(img))
+  motion_model = motion_analysis.MotionLSTM(input_size, hidden_size, num_layers, output_size)
+  motion_model.to(device)
+
+  motion_model.eval()  # Set the model in evaluation mode
+
+  with torch.no_grad():
+      outputs = motion_model(data)
+
+  print(outputs)
+  print(outputs.shape)

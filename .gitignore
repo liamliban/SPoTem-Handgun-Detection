@@ -6,10 +6,7 @@ hiddenlayer/
 __pycache__
 *.prototxt
 videos/
-images/binary_pose
-images/hands_image
-keypoints_data.json
-normalized_keypoints_data.json
+data/
 darknet53.conv.74
 download_weights.sh
 yolo/weights/
