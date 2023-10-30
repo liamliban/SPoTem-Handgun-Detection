@@ -26,7 +26,7 @@ class BinaryPose:
         prev = False
 
         if x0 is None or x1 is None:
-            if cls.prev_x0 or cls.prev_x1 is None: return None # IF AT LEAST ONE PREV KEYPOINT IS MISSING DO NOT CREATE IMAGE
+            if cls.prev_x0 is None or cls.prev_x1 is None: return None # IF AT LEAST ONE PREV KEYPOINT IS MISSING DO NOT CREATE IMAGE
             x0, y0 = cls.prev_x0, cls.prev_y0
             x1, y1 = cls.prev_x1, cls.prev_y1
             prev = True
