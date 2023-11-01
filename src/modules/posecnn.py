@@ -10,22 +10,25 @@ class poseCNN(nn.Module):
         super(poseCNN, self).__init__()
         
         # Conv2d_1
-        self.conv2d_1 = nn.Conv2d(in_channels=1, out_channels=32, kernel_size=3, padding=1)
+        self.conv2d_1 = nn.Conv2d(in_channels=1, out_channels=8, kernel_size=3, padding=0)
         
         # MaxPooling2d_1
         self.max_pooling2d_1 = nn.MaxPool2d(kernel_size=2, stride=2)
         
         # Conv2d_2
-        self.conv2d_2 = nn.Conv2d(in_channels=32, out_channels=64, kernel_size=3, padding=1)
+        self.conv2d_2 = nn.Conv2d(in_channels=8, out_channels=16, kernel_size=3, padding=0)
         
         # MaxPooling2d_2
         self.max_pooling2d_2 = nn.MaxPool2d(kernel_size=2, stride=2)
         
         # Conv2d_3
-        self.conv2d_3 = nn.Conv2d(in_channels=64, out_channels=128, kernel_size=3, padding=1)
+        self.conv2d_3 = nn.Conv2d(in_channels=16, out_channels=32, kernel_size=3, padding=0)
         
         # GlobalAveragePooling2d_1
         self.global_average_pooling2d_1 = nn.AdaptiveAvgPool2d(1)
+
+        # Linear layer
+        self.dense = nn.Linear(32, 20)
 
     def forward(self, x):
         x = F.relu(self.conv2d_1(x))
@@ -36,5 +39,8 @@ class poseCNN(nn.Module):
         fmap = x  # Save the feature map from conv2d_3
         x = self.global_average_pooling2d_1(x)
         gap = x  # Save the feature map from global_average_pooling2d_1
-        
-        return fmap, gap
+        x = x.view(x.size(0), -1)
+        x = self.dense(x)
+        dense = x
+
+        return fmap, gap, dense

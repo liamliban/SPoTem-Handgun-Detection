@@ -8,6 +8,7 @@ from src.modules import motion_analysis
 from yolo.pytorchyolo import models
 import torchvision.transforms as transforms
 from src.modules.posecnn import poseCNN
+from src.modules.gun_yolo import CustomYolo
 
 device = 'cuda:0' if torch.cuda.is_available() else 'cpu'
 print("Device: " , device)
@@ -55,7 +56,7 @@ print_pose_feature = False
 print_motion_feature = False
 
 # Load the YOLO model
-model = models.load_model("yolo/config/yolov3.cfg", "yolo/weights/yolov3.weights")
+yolo_model = models.load_model("yolo/config/yolov3.cfg", "yolo/weights/yolov3.weights")
 
 for person_num in range(num_person):
     print("Person id: ", person_num)
@@ -107,39 +108,32 @@ for person_num in range(num_person):
             # cv2.imshow("Image Inputted to YOLOv3", padded_img)
 
             # Convert the image to a PyTorch tensor
-            hand_image = transforms.ToTensor()(hand_image)
+            # hand_image = transforms.ToTensor()(hand_image)
+            hand_image = transforms.ToTensor()(padded_img)
+            # print("padded", hand_image)
 
             # Add a batch dimension to the tensor
             hand_image = hand_image.unsqueeze(0)
+            print("\t\tInput shape: " , hand_image.shape)
 
-            # Set the model to evaluation mode
-            model.eval()
+            gun_model = CustomYolo(yolo_model)
+            gun_model.to(device)
+            gun_model.eval()
 
-            # Get the conv_81 layer
-            conv81 = model.module_list[81]
-
-            # Create a dictionary to store the activations
-            activation = {}
-
-            # Define a forward hook to capture the activation of the conv_81 layer
-            def get_activation(name):
-                def hook(model, input, output):
-                    activation[name] = output.detach()
-                return hook
-
-            # Register the forward hook on the conv_81 layer
-            conv81.register_forward_hook(get_activation('conv_81'))
-
-            # Forward pass the image through the model
             if torch.cuda.is_available():
                 hand_image = hand_image.cuda()
-            output = model(hand_image)
 
-            # Print the conv_81 layer activation
+            target_activation, dense = gun_model(hand_image)
+            yolo_output = dense
+
             print("\t\tGun Feature Extracted!")
             if print_gun_feature:
-                print("\t\tCONV 81 LAYER FOR FILE NAME: ", hand_path)
-                print("\t\t", activation['conv_81'])
+                print("\t\tFeature map  for file name: ", hand_path)
+                print("\t\t", yolo_output)
+
+            print("\t\tOutput Shape: ", yolo_output.shape)
+
+
         print("")
 
 
@@ -161,12 +155,14 @@ for person_num in range(num_person):
             image = cv2.imread(pose_path, cv2.IMREAD_GRAYSCALE)
             input_image = preprocess(image)
             input_image = input_image.unsqueeze(0)
-            fmap, gap = cnn(input_image)
+            print("\t\tInput shape: " , input_image.shape)
+            fmap, gap, dense = cnn(input_image)
 
             print("\t\tPose Feature Extracted!")
             if print_pose_feature:
-                print(f"\t\tProcessing {pose_path} - Conv2d_3 Feature Map: {fmap}, GAP Feature Map: {gap}")
-
+                # print(f"\t\tProcessing {pose_path} - GAP Feature Map: {gap}")
+                print(f"\t\tProcessing {pose_path} - Feature Map: {dense}")
+            print("\t\tOutput shape: ", dense.shape)
             # USE fmap TO USE FEATURE MAP FROM conv2d_3
             # USE gap TO USE FLATTENED FEATURE MAP FROM GlobalAveragePooling2d_1
         print("")
@@ -180,6 +176,7 @@ for person_num in range(num_person):
                 print("\t\tMotion Analysis: Not enough previous frames. No feature extracted")
             else:
                 motion_shifted_data_frame = motion_shifted_data[frame_num - (window_size - 1)].unsqueeze(0) #get one sequence only
+                print("\t\tInput shape: " , motion_shifted_data_frame.shape)
 
                 # Define the model and specify hyperparameters
                 input_size = 36
@@ -187,17 +184,18 @@ for person_num in range(num_person):
                 num_layers = 1
                 output_size = 1
 
-                motion_model = motion_analysis.MotionLSTM(input_size, hidden_size, num_layers, output_size)
+                motion_model = motion_analysis.MotionLSTM()
                 motion_model.to(device)
 
                 motion_model.eval()  # Set the model in evaluation mode
-
+                
                 with torch.no_grad():
                     motion_feature = motion_model(motion_shifted_data_frame)
 
                 print("\t\tMotion Feature Extracted!")
                 if print_motion_feature:
                     print("\t\t" , motion_feature)
+                print("\t\tOutput shape: ", motion_feature.shape)
         print("")
 
 
