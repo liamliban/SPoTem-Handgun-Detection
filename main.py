@@ -20,9 +20,9 @@ dataset_folder = 'images/dataset/'
 video_label = "5"
 
 # Folder where data are stored
-#   -gun: data/[video_label]/[person_id]/hand_image/
-#   -pose: data/[video_label]/[person_id]/binary_pose/
-#   -motion: data/[video_label]/[person_id]/motion_keypoints/
+#   -gun: data/[video_label]/person_[person_id]/hand_image/
+#   -pose: data/[video_label]/person_[person_id]/binary_pose/
+#   -motion: data/[video_label]/person_[person_id]/motion_keypoints/
 data_folder = f'./data/'
 
 # File names of data:
