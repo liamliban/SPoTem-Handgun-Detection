@@ -20,14 +20,23 @@ class BinaryPose:
             kp = orig_keypoints['keypoints']
 
         # Normalize keypoints based on neck & lumbar
-        x0, y0 = kp[0]['x'], kp[0]['y']
-        x1, y1 = kp[1]['x'], kp[1]['y']
+        x0, y0 = kp[1]['x'], kp[1]['y']
+        x1, y1 = kp[8]['x'], kp[8]['y']
 
         prev = False
 
-        if x0 is None or x1 is None:
-            if cls.prev_x0 is None or cls.prev_x1 is None: return None # IF AT LEAST ONE PREV KEYPOINT IS MISSING DO NOT CREATE IMAGE
+        # if x0 is None or x1 is None:
+        #     if cls.prev_x0 is None or cls.prev_x1 is None: return None # IF AT LEAST ONE PREV KEYPOINT IS MISSING DO NOT CREATE IMAGE
+        #     x0, y0 = cls.prev_x0, cls.prev_y0
+        #     x1, y1 = cls.prev_x1, cls.prev_y1
+        #     prev = True
+        
+        if x0 is None:
+            if cls.prev_x0 is None: return None # IF AT LEAST ONE PREV KEYPOINT IS MISSING DO NOT CREATE IMAGE
             x0, y0 = cls.prev_x0, cls.prev_y0
+            prev = True
+        if x1 is None:
+            if cls.prev_x1 is None: return None # IF AT LEAST ONE PREV KEYPOINT IS MISSING DO NOT CREATE IMAGE
             x1, y1 = cls.prev_x1, cls.prev_y1
             prev = True
 
@@ -54,7 +63,8 @@ class BinaryPose:
         if kp is None: return None, None
 
         # create image PIL 
-        image = Image.new('1', (512, 512), 0) # binary, size, background
+        image_width = 512
+        image = Image.new('1', (image_width, image_width), 0) # binary, size, background
         
         # draw object from PIL
         draw = ImageDraw.Draw(image)
@@ -64,12 +74,14 @@ class BinaryPose:
         line_thickness = 4
         
         # stickman scale
-        scale = 2 * cls.neck_dist # will experiment more on this
+        # scale = 2 * cls.neck_dist # will experiment more on this
+        scale = image_width * 0.25
 
         # custom function to check if keypoint is missing
         def draw_line(x1,y1,x2,y2):
             if not (x1 is None or x2 is None or y1 is None or y2 is None):
-                origin_x, origin_y = 255, 255
+                origin_x = 255
+                origin_y = 255 - 0.5*scale
                 draw.line(
                         (origin_x + x1 * scale, origin_y + y1 * scale,
                         origin_x + x2 * scale, origin_y + y2 * scale), 
