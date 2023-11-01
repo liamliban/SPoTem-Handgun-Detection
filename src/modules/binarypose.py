@@ -19,9 +19,12 @@ class BinaryPose:
         else:
             kp = orig_keypoints['keypoints']
 
-        # Normalize keypoints based on neck & lumbar
-        x0, y0 = kp[1]['x'], kp[1]['y']
-        x1, y1 = kp[8]['x'], kp[8]['y']
+        # Normalize keypoints based on neck & hips
+        neck_kp = kp[1]
+        left_hip_kp = kp[8]
+        right_hip_kp = kp[11]
+        x0, y0 = neck_kp['x'], neck_kp['y']
+        x1, y1 = left_hip_kp['x'], left_hip_kp['y']
 
         prev = False
 
@@ -36,9 +39,12 @@ class BinaryPose:
             x0, y0 = cls.prev_x0, cls.prev_y0
             prev = True
         if x1 is None:
-            if cls.prev_x1 is None: return None # IF AT LEAST ONE PREV KEYPOINT IS MISSING DO NOT CREATE IMAGE
-            x1, y1 = cls.prev_x1, cls.prev_y1
-            prev = True
+            if right_hip_kp['x'] is not None:
+                x1, y1 = right_hip_kp['x'], right_hip_kp['y']
+            else:
+                if cls.prev_x1 is None: return None # IF AT LEAST ONE PREV KEYPOINT IS MISSING DO NOT CREATE IMAGE
+                x1, y1 = cls.prev_x1, cls.prev_y1
+                prev = True
 
         cls.prev_x0 = x0
         cls.prev_y0 = y0

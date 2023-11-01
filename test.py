@@ -17,7 +17,7 @@ print("Device: " , device)
 
 # Choose dataset
 dataset_folder = 'images/dataset/'
-video_label = "8"
+video_label = "14"
 
 # Folder where data are stored
 #   -gun: data/[video_label]/hand_image/[person_id]/
