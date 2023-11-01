@@ -55,7 +55,6 @@ def _get_normalized(normalized_keypoints, person_id, null_value):
 # takes a keypoints_sequence and save it into a text file
 def _save_keypoints(keypoints_sequence, person_id, folder_path):
     # File Path
-    folder_path = f'{folder_path}{person_id}/'
     file_path = f'{folder_path}keypoints_seq.txt'
 
     # Check Directory

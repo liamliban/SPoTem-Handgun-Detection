@@ -122,7 +122,6 @@ class BinaryPose:
         draw_line(kp[17]['x'], kp[17]['y'], kp[16]['x'], kp[16]['y'])
 
         # File Path
-        folder_path = f'{folder_path}{keypoints["person_id"]}/'
         file_name = f'{folder_path}pose_{frame_number}.png'
 
         # Check Directory

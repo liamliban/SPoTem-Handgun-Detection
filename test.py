@@ -17,12 +17,12 @@ print("Device: " , device)
 
 # Choose dataset
 dataset_folder = 'images/dataset/'
-video_label = "14"
+video_label = "5"
 
 # Folder where data are stored
-#   -gun: data/[video_label]/hand_image/[person_id]/
-#   -pose: data/[video_label]/binary_pose/[person_id]/
-#   -motion: data/[video_label]/motion_keypoints/[person_id]/
+#   -gun: data/[video_label]/[person_id]/hand_image/
+#   -pose: data/[video_label]/[person_id]/binary_pose/
+#   -motion: data/[video_label]/[person_id]/motion_keypoints/
 data_folder = f'./data/'
 
 # File names of data:

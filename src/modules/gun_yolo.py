@@ -37,7 +37,7 @@ class CustomYolo(nn.Module):
         x = self.yolo(x)
         
         # Extract the target activation (e.g., 'conv_81')
-        target_activation = activation[self.target_layer_name]
+        target_activation = activation[self.target_layer_name] #torch.Size([1, 255, 13, 16])
         
         # Remove the hook to avoid memory leaks
         hook_handle.remove()

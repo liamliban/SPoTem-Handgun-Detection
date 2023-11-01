@@ -78,6 +78,9 @@ def create_data(dataset_folder, video_label, data_folder, display_animation = Fa
 
         for person_id in range(len(subset)):
             print("Person ID: ", person_id)
+
+            person_folder = output_folder + "person_" + str(person_id) + "/"
+
             confidence_min = 0.1
             # extract keypoints dictionary (person_id,keypoints)
             keypoints = bodykeypoints.extract_keypoints(person_id, candidate, subset, confidence_min)
@@ -99,8 +102,8 @@ def create_data(dataset_folder, video_label, data_folder, display_animation = Fa
             hand_image_width = 256
             
             # hand image filename : hands_{frame_number}_{person_id}.png
-            hand_folder = output_folder + "hand_image/"
-            handregion_image, hand_file_name = handimage.create_hand_image(resized_image, hand_regions, target_size, hand_image_width, frame_number, person_id, hand_folder)
+            hand_folder = person_folder + "hand_image/"
+            handregion_image, hand_file_name = handimage.create_hand_image(resized_image, hand_regions, target_size, hand_image_width, frame_number, hand_folder)
             
 
             # display the hand region image
@@ -108,7 +111,7 @@ def create_data(dataset_folder, video_label, data_folder, display_animation = Fa
                 cv2.imshow("hand region image", handregion_image)
 
             # create and save the binary pose image
-            binary_folder = output_folder + "binary_pose/"
+            binary_folder = person_folder + "binary_pose/"
             normalized_keypoints, binary_file_name = BinaryPose.createBinaryPose(keypoints, frame_number, binary_folder)
 
             # add normalized keypoints to normalized_keypoints_per_frame list
@@ -172,8 +175,8 @@ def create_data(dataset_folder, video_label, data_folder, display_animation = Fa
     #         print("\t\tkps length : ", len(person.get("keypoints")))
 
     # create motion preprocessed data txt file for each person in video
-    motion_folder = output_folder + "motion_keypoints/"
     for person_id in range(total_num_person):
+        motion_folder = output_folder + "person_" + str(person_id) + "/motion_keypoints/"
         motion_preprocess.preprocess_data(normalized_keypoints_data, person_id, motion_folder)
 
     return num_frames, total_num_person

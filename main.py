@@ -20,9 +20,9 @@ dataset_folder = 'images/dataset/'
 video_label = "5"
 
 # Folder where data are stored
-#   -gun: data/[video_label]/hand_image/[person_id]/
-#   -pose: data/[video_label]/binary_pose/[person_id]/
-#   -motion: data/[video_label]/motion_keypoints/[person_id]/
+#   -gun: data/[video_label]/[person_id]/hand_image/
+#   -pose: data/[video_label]/[person_id]/binary_pose/
+#   -motion: data/[video_label]/[person_id]/motion_keypoints/
 data_folder = f'./data/'
 
 # File names of data:
@@ -47,11 +47,6 @@ if os.path.exists(output_folder):
 num_frames, num_person = data_creator.create_data(dataset_folder, video_label, data_folder, display_animation)
 
 
-# Folders of data
-hand_image_folder = data_folder + video_label + '/hand_image/'
-binary_pose_folder = data_folder + video_label + '/binary_pose/'
-motion_keypoints_folder = data_folder + video_label + '/motion_keypoints/'
-
 # Print or not print features of models
 print_gun_feature = False
 print_pose_feature = False
@@ -63,8 +58,11 @@ yolo_model = models.load_model("yolo/config/yolov3.cfg", "yolo/weights/yolov3.we
 for person_num in range(num_person):
     print("Person id: ", person_num)
 
+    person_folder = output_folder + "person_" + str(person_num) + "/"
+
     # Get Path of motion data
-    motion_path = motion_keypoints_folder + str(person_num) + "/" + "keypoints_seq.txt"
+    motion_keypoints_folder = person_folder + 'motion_keypoints/'
+    motion_path = motion_keypoints_folder + "keypoints_seq.txt"
     
     # Check if data file exist
     motion_file_exist = os.path.isfile(motion_path)
@@ -82,7 +80,8 @@ for person_num in range(num_person):
         print("\tFrame num: ", frame_num)
 
         # Get path of hand data
-        hand_path = hand_image_folder + str(person_num) + "/" + "hands_" + str(frame_num) + ".png"
+        hand_image_folder = person_folder + 'hand_image/'
+        hand_path = hand_image_folder +  "hands_" + str(frame_num) + ".png"
         
         # Check if data file exist
         hand_file_exist = os.path.isfile(hand_path)
@@ -143,7 +142,8 @@ for person_num in range(num_person):
 
 
         # Get path of pose data
-        pose_path = binary_pose_folder + str(person_num) + "/" + "pose_" + str(frame_num) + ".png"
+        binary_pose_folder = person_folder + 'binary_pose/'
+        pose_path = binary_pose_folder + "pose_" + str(frame_num) + ".png"
 
         # Check if data file exist
         pose_file_exist = os.path.isfile(pose_path)
