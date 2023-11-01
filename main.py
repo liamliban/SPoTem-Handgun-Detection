@@ -219,20 +219,18 @@ for person_num in range(num_person):
             combined_model.eval()
         
             with torch.no_grad():
-                # Forward pass through the combined model
                 combined_output = combined_model(gun_model_input, pose_model_input, motion_model_input)
 
             print("\t\tCombined Model with Motion Output: ", combined_output)
 
             # COMBINED MODEL NO MOTION
-            combined_2_feature_size = 20 + 20#total num of features of 3 model outputs
+            combined_2_feature_size = 20 + 20 #total num of features of 2 model outputs
 
             combined_model_2 = CombinedModelNoMotion(gun_model, pose_model, combined_2_feature_size)
             combined_model_2.to(device)
             combined_model_2.eval()
         
             with torch.no_grad():
-                # Forward pass through the combined model
                 combined_output_2 = combined_model_2(gun_model_input, pose_model_input)
 
             print("\t\tCombined Model without Motion Output: ", combined_output_2)
