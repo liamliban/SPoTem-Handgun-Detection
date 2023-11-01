@@ -9,6 +9,7 @@ from yolo.pytorchyolo import models
 import torchvision.transforms as transforms
 from src.modules.posecnn import poseCNN
 from src.modules.gun_yolo import CustomYolo
+from src.modules.combined_model import CombinedModel
 
 device = 'cuda:0' if torch.cuda.is_available() else 'cpu'
 print("Device: " , device)
@@ -86,8 +87,8 @@ for person_num in range(num_person):
         hand_file_exist = os.path.isfile(hand_path)
         print("\t\tHand path exist? ", hand_file_exist , "\thand_path: " , hand_path)
 
+        # GUN FEATURE EXTRACTION
         if hand_file_exist:
-            # GUN FEATURE EXTRACTION
             print("\t\tExtracting Gun Feature")
             input_size = (416, 416)
 
@@ -114,17 +115,18 @@ for person_num in range(num_person):
 
             # Add a batch dimension to the tensor
             hand_image = hand_image.unsqueeze(0)
-            print("\t\tInput shape: " , hand_image.shape)
+            gun_model_input = hand_image
+            print("\t\tInput shape: " , gun_model_input.shape)
 
             gun_model = CustomYolo(yolo_model)
             gun_model.to(device)
             gun_model.eval()
 
             if torch.cuda.is_available():
-                hand_image = hand_image.cuda()
+                gun_model_input = gun_model_input.cuda()
 
-            target_activation, dense = gun_model(hand_image)
-            yolo_output = dense
+            pose_feature = gun_model(gun_model_input)
+            yolo_output = pose_feature
 
             print("\t\tGun Feature Extracted!")
             if print_gun_feature:
@@ -146,23 +148,28 @@ for person_num in range(num_person):
         pose_file_exist = os.path.isfile(pose_path)
         print("\t\tpose path exist? ", pose_file_exist , "\tpose_path: ", pose_path)
 
+        # POSE FEATURE EXTRACTION
         if pose_file_exist:
-            # POSE FEATURE EXTRACTION
             print("\t\tExtracting Pose Feature")
             # Instantiate CNN model for Binary Pose Images
-            cnn = poseCNN()
+            pose_model = poseCNN()
             preprocess = transforms.Compose([ transforms.ToTensor() ])
             image = cv2.imread(pose_path, cv2.IMREAD_GRAYSCALE)
             input_image = preprocess(image)
             input_image = input_image.unsqueeze(0)
-            print("\t\tInput shape: " , input_image.shape)
-            fmap, gap, dense = cnn(input_image)
+            pose_model_input = input_image
+            print("\t\tInput shape: " , pose_model_input.shape)
+
+            if torch.cuda.is_available():
+                pose_model_input = pose_model_input.cuda()
+            pose_model.to(device)
+
+            pose_feature = pose_model(pose_model_input)
 
             print("\t\tPose Feature Extracted!")
             if print_pose_feature:
-                # print(f"\t\tProcessing {pose_path} - GAP Feature Map: {gap}")
-                print(f"\t\tProcessing {pose_path} - Feature Map: {dense}")
-            print("\t\tOutput shape: ", dense.shape)
+                print(f"\t\tProcessing {pose_path} - Feature Map: {pose_feature}")
+            print("\t\tOutput shape: ", pose_feature.shape)
             # USE fmap TO USE FEATURE MAP FROM conv2d_3
             # USE gap TO USE FLATTENED FEATURE MAP FROM GlobalAveragePooling2d_1
         print("")
@@ -175,8 +182,10 @@ for person_num in range(num_person):
             if frame_num < window_size - 1:
                 print("\t\tMotion Analysis: Not enough previous frames. No feature extracted")
             else:
-                motion_shifted_data_frame = motion_shifted_data[frame_num - (window_size - 1)].unsqueeze(0) #get one sequence only
-                print("\t\tInput shape: " , motion_shifted_data_frame.shape)
+                motion_model_input = motion_shifted_data[frame_num - (window_size - 1)].unsqueeze(0) #get one sequence only
+                if torch.cuda.is_available():
+                    motion_model_input = motion_model_input.cuda()
+                print("\t\tInput shape: " , motion_model_input.shape)
 
                 # Define the model and specify hyperparameters
                 input_size = 36
@@ -190,13 +199,31 @@ for person_num in range(num_person):
                 motion_model.eval()  # Set the model in evaluation mode
                 
                 with torch.no_grad():
-                    motion_feature = motion_model(motion_shifted_data_frame)
+                    motion_feature = motion_model(motion_model_input)
 
                 print("\t\tMotion Feature Extracted!")
                 if print_motion_feature:
                     print("\t\t" , motion_feature)
                 print("\t\tOutput shape: ", motion_feature.shape)
         print("")
+
+
+        if hand_file_exist and pose_file_exist and motion_file_exist and not(frame_num < window_size - 1):
+            # COMBINED MODEL
+            print("\t\tCOMBINATION MODEL")
+            combined_feature_size = 20 + 20 + 20 #total num of features of 3 model outputs
+
+            combined_model = CombinedModel(gun_model, pose_model, motion_model, combined_feature_size)
+            combined_model.to(device)
+            combined_model.eval()
+        
+            with torch.no_grad():
+                # Forward pass through the combined model
+                combined_output = combined_model(gun_model_input, pose_model_input, motion_model_input)
+
+            print("\t\tCombined Model Output: ", combined_output)
+        print("")
+         
 
 
 

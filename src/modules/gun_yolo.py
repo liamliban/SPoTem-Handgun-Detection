@@ -2,7 +2,6 @@
 import torch
 import torch.nn as nn
 from src import model
-from src.modules import motion_analysis
 from yolo.pytorchyolo import models
 import torchvision.transforms as transforms
 
@@ -16,6 +15,11 @@ class CustomYolo(nn.Module):
     def __init__(self, yolo_model):
         super(CustomYolo, self).__init__()
         self.yolo = yolo_model
+
+        # freeze all parameters of the model
+        for param in self.yolo.parameters():
+            param.requires_grad = False
+
         self.target_layer_name = 'conv_81'
         self.target_layer_index = 81
                 
@@ -46,4 +50,4 @@ class CustomYolo(nn.Module):
 
         dense = x
         
-        return target_activation, dense
+        return dense

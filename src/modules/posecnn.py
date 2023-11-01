@@ -2,7 +2,6 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from torchvision import transforms
-from PIL import Image
 
 # Define the CNN model without the dense layer
 class poseCNN(nn.Module):
@@ -43,4 +42,4 @@ class poseCNN(nn.Module):
         x = self.dense(x)
         dense = x
 
-        return fmap, gap, dense
+        return dense
