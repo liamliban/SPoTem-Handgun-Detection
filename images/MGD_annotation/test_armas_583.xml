@@ -1,0 +1,14 @@
+<annotation verified="yes">
+	<folder>images</folder>
+	<filename>test_armas_583.jpg</filename>
+	<path>/home/boi/ml/datasets/granada-guns/test/images/frame14.jpg</path>
+	<source>
+		<database>Unknown</database>
+	</source>
+	<size>
+		<width>512</width>
+		<height>512</height>
+		<depth>3</depth>
+	</size>
+	<segmented>0</segmented>
+</annotation>

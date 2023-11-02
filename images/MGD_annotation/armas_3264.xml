@@ -1,0 +1,26 @@
+<annotation>
+	<folder>images</folder>
+	<filename>armas_3264.jpg</filename>
+	<path>armas_3264.jpg</path>
+	<source>
+		<database>Unknown</database>
+	</source>
+	<size>
+		<width>512</width>
+		<height>512</height>
+		<depth>3</depth>
+	</size>
+	<segmented>0</segmented>
+	<object>
+		<name>pistol</name>
+		<pose>Unspecified</pose>
+		<truncated>0</truncated>
+		<difficult>0</difficult>
+		<bndbox>
+			<xmin>121</xmin>
+			<ymin>311</ymin>
+			<xmax>210</xmax>
+			<ymax>368</ymax>
+		</bndbox>
+	</object>
+</annotation>

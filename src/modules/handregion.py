@@ -13,25 +13,25 @@ def extract_hand_regions(keypoints, threshold = 0.9):
     
     
     # get boxes before overlap checking
-    box_left = extract_hand_region(left_wrist, left_elbow)
-    box_right = extract_hand_region(right_wrist, right_elbow)
+    box_left = _extract_hand_region(left_wrist, left_elbow)
+    box_right = _extract_hand_region(right_wrist, right_elbow)
 
     # check overlap
-    hand_regions = hand_region_iou(box_left, box_right, threshold)
+    hand_regions = _hand_region_iou(box_left, box_right, threshold)
 
     return hand_regions
 
 def draw_hand_regions(canvas, hand_regions):
     for hand_region in hand_regions:
-        draw_hand_box(canvas, hand_region)
+        _draw_hand_box(canvas, hand_region)
 
 # draw one hand region bounding box if it exist
-def draw_hand_box(canvas, box):
+def _draw_hand_box(canvas, box):
     if box is not None:
         cv2.rectangle(canvas, (box[0], box[1]), (box[2], box[3]), (0, 0, 255), 2) 
 
 # Extract one hand region
-def extract_hand_region(wrist, elbow):
+def _extract_hand_region(wrist, elbow):
     # Add bounding box of hand area based on wrist and elbow
     if elbow['confidence'] > 0 and wrist['confidence'] > 0:
         # approximate the position of the gun (center) by moving the wrist position further
@@ -50,10 +50,10 @@ def extract_hand_region(wrist, elbow):
         return None
 
 # check if 2 hand region boxes should be combined based on iou, return box/s
-def hand_region_iou(boxL, boxR, threshold):
+def _hand_region_iou(boxL, boxR, threshold):
     if boxL is None or boxR is None:
         return [boxL, boxR]
-    iou = bb_modified_iou(boxL,boxR)
+    iou = _bb_modified_iou(boxL,boxR)
     if iou > threshold: #if above threshold, combine boxes
         l_x_min = boxL[0]
         l_y_min = boxL[1]
@@ -77,7 +77,7 @@ def hand_region_iou(boxL, boxR, threshold):
 
 # get intersection over min area of 2 boxes
 # modified iou to have higher score for boxes of different sizes
-def bb_modified_iou(boxA, boxB):
+def _bb_modified_iou(boxA, boxB):
 	# determine the (x, y)-coordinates of the intersection rectangle
 	xA = max(boxA[0], boxB[0])
 	yA = max(boxA[1], boxB[1])
@@ -97,3 +97,14 @@ def bb_modified_iou(boxA, boxB):
 	iou = interArea / min(boxAArea, boxBArea)
 	# return the intersection over union value
 	return iou
+
+# Save a text file of the hand_regions sequence
+def save_hand_regions_txt(output_folder, hand_regions_of_vid):
+    string = str(hand_regions_of_vid)
+
+    hand_regions_txt_path = output_folder + "hand_regions_coords.txt"
+
+    with open(hand_regions_txt_path, 'w') as text_file:
+        text_file.write(string + '\n')
+
+    print("Hand regions coordiantes stored in: ", hand_regions_txt_path)

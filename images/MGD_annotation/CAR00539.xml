@@ -1,0 +1,26 @@
+<annotation>
+	<folder>Armas_Personas_Videos_Robos</folder>
+	<filename>CAR00539.jpg</filename>
+	<path>C:\Users\Marcus\Downloads\Base Armas\Armas_Personas_Videos_Robos\CAR00539.jpg</path>
+	<source>
+		<database>Unknown</database>
+	</source>
+	<size>
+		<width>149</width>
+		<height>308</height>
+		<depth>3</depth>
+	</size>
+	<segmented>0</segmented>
+	<object>
+		<name>pistol</name>
+		<pose>Unspecified</pose>
+		<truncated>0</truncated>
+		<difficult>0</difficult>
+		<bndbox>
+			<xmin>112</xmin>
+			<ymin>43</ymin>
+			<xmax>136</xmax>
+			<ymax>80</ymax>
+		</bndbox>
+	</object>
+</annotation>
