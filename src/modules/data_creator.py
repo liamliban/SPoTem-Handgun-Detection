@@ -163,10 +163,11 @@ def create_data(dataset_folder, video_label, data_folder, display_animation = Fa
 
     # print(f"Keypoints data saved to {output_json_file}")
 
-    # # Save the normalized keypoints data to a JSON file
+    # Save the normalized keypoints data to a JSON file
+    # test = normalized_keypoints_data
     # output_json_file = 'normalized_keypoints_data.json'
     # with open(output_json_file, 'w') as json_file:
-    #     json.dump(normalized_keypoints_data, json_file, indent=4)
+    #     json.dump(test, json_file, indent=4)
 
     # print(f"Keypoints data saved to {output_json_file}")
 
