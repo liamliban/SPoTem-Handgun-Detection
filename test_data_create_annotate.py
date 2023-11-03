@@ -43,7 +43,7 @@ num_frames, num_person = data_creator.create_data(dataset_folder, video_name, da
 data_folder = "data/"
 
 # folder where the MGD annotation is stored
-annotation_folder = "images/MGD_annotation/"
+annotation_folder = "raw_dataset/annotations/"
 
 # Create video annotation
 video_labels = annotator.create_MGD_vid_annotation(dataset_folder, data_folder, video_name, output_folder, annotation_folder)

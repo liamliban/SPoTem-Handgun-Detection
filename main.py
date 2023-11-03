@@ -55,7 +55,7 @@ if dataset_is_MGD:
     data_folder = "data/"
 
     # folder where the MGD annotation is stored
-    annotation_folder = "images/MGD_annotation/"
+    annotation_folder = "raw_dataset/annotations/"
 
     # Create video annotation
     video_labels = annotator.create_MGD_vid_annotation(dataset_folder, data_folder, video_name, output_folder, annotation_folder)
