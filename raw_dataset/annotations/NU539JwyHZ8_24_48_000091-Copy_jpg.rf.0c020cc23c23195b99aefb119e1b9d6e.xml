@@ -1,0 +1,27 @@
+<annotation>
+	<folder></folder>
+	<filename>NU539JwyHZ8_24_48_000091-Copy_jpg.rf.0c020cc23c23195b99aefb119e1b9d6e.jpg</filename>
+	<path>NU539JwyHZ8_24_48_000091-Copy_jpg.rf.0c020cc23c23195b99aefb119e1b9d6e.jpg</path>
+	<source>
+		<database>roboflow.com</database>
+	</source>
+	<size>
+		<width>1280</width>
+		<height>720</height>
+		<depth>3</depth>
+	</size>
+	<segmented>0</segmented>
+	<object>
+		<name>pistol</name>
+		<pose>Unspecified</pose>
+		<truncated>0</truncated>
+		<difficult>0</difficult>
+		<occluded>0</occluded>
+		<bndbox>
+			<xmin>265</xmin>
+			<xmax>1056</xmax>
+			<ymin>227</ymin>
+			<ymax>630</ymax>
+		</bndbox>
+	</object>
+</annotation>

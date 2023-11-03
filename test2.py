@@ -9,6 +9,6 @@ output_folder = data_folder + video_name + "/"
 
 annotation_folder = "images/MGD_annotation/"
 
-video_labels = annotator.create_MGD_vid_annotation(dataset_folder, data_folder, video_name, output_folder, annotation_folder)
+video_labels = annotator.create_vid_annotation(dataset_folder, data_folder, video_name, output_folder, annotation_folder)
 
 annotator.save_video_labels_csv(video_labels, output_folder)

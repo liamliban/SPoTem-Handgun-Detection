@@ -1,0 +1,27 @@
+<annotation>
+	<folder></folder>
+	<filename>1NAAnu_tSK8_25_50_000021_jpg.rf.b597a15b1a6fe223e9b1bc1de4209649.jpg</filename>
+	<path>1NAAnu_tSK8_25_50_000021_jpg.rf.b597a15b1a6fe223e9b1bc1de4209649.jpg</path>
+	<source>
+		<database>roboflow.com</database>
+	</source>
+	<size>
+		<width>1280</width>
+		<height>720</height>
+		<depth>3</depth>
+	</size>
+	<segmented>0</segmented>
+	<object>
+		<name>pistol</name>
+		<pose>Unspecified</pose>
+		<truncated>0</truncated>
+		<difficult>0</difficult>
+		<occluded>0</occluded>
+		<bndbox>
+			<xmin>411</xmin>
+			<xmax>809</xmax>
+			<ymin>297</ymin>
+			<ymax>459</ymax>
+		</bndbox>
+	</object>
+</annotation>

@@ -8,8 +8,8 @@ device = 'cuda:0' if torch.cuda.is_available() else 'cpu'
 print("Device: " , device)
 
 # Choose dataset
-dataset_folder = 'images/dataset/'
-video_name = "18"
+dataset_folder = 'raw_dataset/dataset/'
+video_name = "14"
 
 # Folder where data are stored
 #   -gun: data/[video_label]/[person_id]/hand_image/
@@ -42,11 +42,11 @@ num_frames, num_person = data_creator.create_data(dataset_folder, video_name, da
 # folder where the generated data by data_creator is stored
 data_folder = "data/"
 
-# folder where the MGD annotation is stored
+# folder where the annotations are stored
 annotation_folder = "raw_dataset/annotations/"
 
 # Create video annotation
-video_labels = annotator.create_MGD_vid_annotation(dataset_folder, data_folder, video_name, output_folder, annotation_folder)
+video_labels = annotator.create_vid_annotation(dataset_folder, data_folder, video_name, output_folder, annotation_folder)
 
 # Save video annotation
 annotator.save_video_labels_csv(video_labels, output_folder)
