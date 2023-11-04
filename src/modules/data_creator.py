@@ -56,11 +56,6 @@ def create_data(dataset_folder, video_label, data_folder, display_animation = Fa
 
         orig_image_size = orig_image.shape[:2]
 
-        # Preprocessing:
-        # Resize the image to a target size (e.g., 368x368 pixels)
-        # target_size = (416, 416)
-        # resized_image = cv2.resize(orig_image, target_size)
-
         # Body pose estimation
         candidate, subset = body_estimation(orig_image)
 
@@ -135,14 +130,30 @@ def create_data(dataset_folder, video_label, data_folder, display_animation = Fa
         return canvas
 
     num_frames = len(image_files)
+
+    processed_frame_0 = False
     if display_animation:
         # Create a function to update the animation
         def update(frame):
-            plt.clf()  # Clear the previous frame
-            current_frame = process_frame(frame)
-            plt.imshow(current_frame[:, :, [2, 1, 0]])  # Display the current frame
-            plt.axis('off')
-            plt.title(f'Frame {frame}')
+            nonlocal processed_frame_0 
+            if frame == 0 and not processed_frame_0:
+                # Process frame 0
+                current_frame = process_frame(frame)
+                plt.imshow(current_frame[:, :, [2, 1, 0]])  # Display the current frame
+                plt.axis('off')
+                plt.title(f'Frame {frame}')
+                processed_frame_0 = True
+            else:
+                if frame > 0:
+                    # Process other frames
+                    plt.clf()  # Clear the previous frame
+                    current_frame = process_frame(frame)
+                    plt.imshow(current_frame[:, :, [2, 1, 0]])  # Display the current frame
+                    plt.axis('off')
+                    plt.title(f'Frame {frame}')
+                    if frame == num_frames - 1:
+                        plt.close()
+                        cv2.destroyAllWindows()
 
         # Create the animation
         fig, ax = plt.subplots()
@@ -151,41 +162,13 @@ def create_data(dataset_folder, video_label, data_folder, display_animation = Fa
         # Display the animation
         if display_animation:
             plt.show()
+            
     else:
         for frame in range(num_frames):
             process_frame(frame)
         
 
-    # # Save the keypoints data to a JSON file
-    # output_json_file = 'keypoints_data.json'
-    # with open(output_json_file, 'w') as json_file:
-    #     json.dump(keypoints_data, json_file, indent=4)
-
-    # print(f"Keypoints data saved to {output_json_file}")
-
-    # Save the normalized keypoints data to a JSON file
-    # test = normalized_keypoints_data
-    # output_json_file = 'normalized_keypoints_data.json'
-    # with open(output_json_file, 'w') as json_file:
-    #     json.dump(test, json_file, indent=4)
-
-    # print(f"Keypoints data saved to {output_json_file}")
-
     print("total num person: " , total_num_person)
-
-    # print("keypoints test")
-    # for frame in keypoints_data:
-    #     print("\tframe num : ", frame.get("frame_number"))
-    #     for person in frame.get("keypoints"):
-    #         print("\t\tperson id : ", person.get("person_id"))
-    #         print("\t\tkps length : ", len(person.get("keypoints")))
-
-    # print("normalized keypoints test")
-    # for frame in normalized_keypoints_data:
-    #     print("\tframe num : ", frame.get("frame_number"))
-    #     for person in frame.get("keypoints"):
-    #         print("\t\tperson id : ", person.get("person_id"))
-    #         print("\t\tkps length : ", len(person.get("keypoints")))
 
     # create motion preprocessed data txt file for each person in video
     for person_id in range(total_num_person):
