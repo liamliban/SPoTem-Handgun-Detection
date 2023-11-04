@@ -21,6 +21,35 @@ def extract_hand_regions(keypoints, threshold = 0.9):
 
     return hand_regions
 
+# takes the hand regions coordinates of a resized image
+# returns the corresponding coordinates for the original image
+def get_orig_hand_regions(orig_image_size, resized_image_size, resized_hand_regions):
+    x_scale = orig_image_size[1] / resized_image_size[1]
+    y_scale = orig_image_size[0] / resized_image_size[0]
+
+    orig_hand_regions = []
+    
+    for hand_region in resized_hand_regions:
+        if hand_region is None:
+            orig_hand_region = None
+        else:
+            # scale the coordinates
+            x_min = hand_region[0] * x_scale
+            y_min = hand_region[1] * y_scale
+            x_max = hand_region[2] * x_scale
+            y_max = hand_region[3] * y_scale
+            
+            x_min = round(x_min)
+            y_min = round(y_min)
+            x_max = round(x_max)
+            y_max = round(y_max)
+
+            orig_hand_region = [x_min,y_min,x_max,y_max]
+        orig_hand_regions.append(orig_hand_region)
+    
+    return orig_hand_regions
+
+
 def draw_hand_regions(canvas, hand_regions):
     for hand_region in hand_regions:
         _draw_hand_box(canvas, hand_region)

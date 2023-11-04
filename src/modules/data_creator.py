@@ -42,7 +42,7 @@ def create_data(dataset_folder, video_label, data_folder, display_animation = Fa
 
     # Initialize list of hand_regions coordinates 
     # [frame 0 = [person 0 = [hand_regions = [hand_region = [x_min,..., y_max] , ], ], ] , ]
-    hand_regions_of_vid = []
+    orig_hand_regions_of_vid = []
 
     # Function to load and process an image frame
     def process_frame(frame_number):
@@ -55,17 +55,22 @@ def create_data(dataset_folder, video_label, data_folder, display_animation = Fa
         test_image = os.path.join(image_folder, image_file)
         orig_image = cv2.imread(test_image)  # B,G,R order
 
-        orig_image_size = orig_image.shape[:2]
+        orig_image_shape = orig_image.shape[:2]
+
+        # Resize the image
+        target_size = (512,512)
+        resized_image = cv2.resize(orig_image, target_size)
+        resized_image_shape = resized_image.shape[:2]
 
         # Body pose estimation
-        candidate, subset = body_estimation(orig_image)
+        candidate, subset = body_estimation(resized_image)
 
         # update max number of person in video
         global total_num_person
         total_num_person = max(total_num_person, len(subset))
 
         # Visualize body pose on the image
-        canvas = copy.deepcopy(orig_image)
+        canvas = copy.deepcopy(resized_image)
         canvas = util.draw_bodypose(canvas, candidate, subset)
 
         # Extract keypoints data (coordinates and confidence scores)
@@ -78,7 +83,7 @@ def create_data(dataset_folder, video_label, data_folder, display_animation = Fa
             'keypoints': []
         }
 
-        hand_regions_per_frame = [] #[[person 0] , [person 1] ...]
+        orig_hand_regions_per_frame = [] #[[person 0] , [person 1] ...]
 
         for person_id in range(len(subset)):
             print("Person ID: ", person_id)
@@ -98,8 +103,13 @@ def create_data(dataset_folder, video_label, data_folder, display_animation = Fa
             # get box coordinates of hand regions
             hand_intersect_threshold = 0.9
             hand_regions = handregion.extract_hand_regions(keypoints, hand_intersect_threshold)
+            print("Hand regions of resized image: ", hand_regions)
+            
+            # get the coordiantes of hand regions for the original image
+            orig_hand_regions = handregion.get_orig_hand_regions(orig_image_shape, resized_image_shape, hand_regions)
+            print("Hand region of original image: ", orig_hand_regions)
 
-            hand_regions_per_frame.append(hand_regions)
+            orig_hand_regions_per_frame.append(orig_hand_regions)
 
             # draw hand regions on canvas
             handregion.draw_hand_regions(canvas, hand_regions)
@@ -109,7 +119,7 @@ def create_data(dataset_folder, video_label, data_folder, display_animation = Fa
             
             # hand image filename : hands_{frame_number}.png
             hand_folder = person_folder + "hand_image/"
-            handregion_image, hand_file_name = handimage.create_hand_image(orig_image, hand_regions, orig_image_size, hand_image_width, frame_number, hand_folder)
+            handregion_image, hand_file_name = handimage.create_hand_image(resized_image, hand_regions, resized_image_shape, hand_image_width, frame_number, hand_folder)
             
 
             # display the hand region image
@@ -126,7 +136,7 @@ def create_data(dataset_folder, video_label, data_folder, display_animation = Fa
         keypoints_data.append(keypoints_per_frame)
         normalized_keypoints_data.append(normalized_keypoints_per_frame)
 
-        hand_regions_of_vid.append(hand_regions_per_frame)
+        orig_hand_regions_of_vid.append(orig_hand_regions_per_frame)
 
         return canvas
 
@@ -176,8 +186,8 @@ def create_data(dataset_folder, video_label, data_folder, display_animation = Fa
         motion_folder = output_folder + "person_" + str(person_id) + "/motion_keypoints/"
         motion_preprocess.preprocess_data(normalized_keypoints_data, person_id, motion_folder)
 
-        # save hand_regions sequence of person in a txt file
-        handregion.save_hand_regions_txt(output_folder,hand_regions_of_vid)
+        # save hand_regions (original coordinates) sequence of person in a txt file
+        handregion.save_hand_regions_txt(output_folder,orig_hand_regions_of_vid)
 
     return num_frames, total_num_person
 
