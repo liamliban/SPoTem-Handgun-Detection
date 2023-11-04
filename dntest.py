@@ -9,11 +9,10 @@ from yolo.pytorchyolo import models
 import torchvision.transforms as transforms
 from src.modules import annotator
 from src.modules.posecnn import poseCNN
-from src.modules.gun_yolo import CustomYolo
 from src.modules.combined_model import CombinedModel
 from src.modules.combined_model_no_motion import CombinedModelNoMotion
-from src.modules.darknet import DarkNet53 
-from src.modules.darknet import ResidualBlock
+from src.modules.gun_yolo import DarkNet53FeatureExtractor
+from src.modules.gun_yolo import ResidualBlock
 import torch.nn as nn
 
 device = 'cuda:0' if torch.cuda.is_available() else 'cpu'
@@ -126,19 +125,14 @@ for person_num in range(num_person):
             right = padding_width - left
             padded_img = cv2.copyMakeBorder(hand_image, top, bottom, left, right, cv2.BORDER_CONSTANT, value=(0, 0, 0))
 
-            # cv2.imshow("Image Inputted to YOLOv3", padded_img)
-
-            # Convert the image to a PyTorch tensor
-            # hand_image = transforms.ToTensor()(hand_image)
             hand_image = transforms.ToTensor()(padded_img)
-            # print("padded", hand_image)
 
             # Add a batch dimension to the tensor
             hand_image = hand_image.unsqueeze(0)
             gun_model_input = hand_image
             print("\t\tInput shape: " , gun_model_input.shape)
 
-            gun_model = DarkNet53(block=ResidualBlock, num_classes=1, init_weight=True)
+            gun_model = DarkNet53FeatureExtractor(ResidualBlock)
             gun_model.to(device)
             gun_model.eval()
 
