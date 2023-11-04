@@ -1,0 +1,27 @@
+<annotation>
+	<folder></folder>
+	<filename>00002621_png.rf.b968fadd9a1c00d93b5ddb6ba356133f.jpg</filename>
+	<path>00002621_png.rf.b968fadd9a1c00d93b5ddb6ba356133f.jpg</path>
+	<source>
+		<database>roboflow.com</database>
+	</source>
+	<size>
+		<width>720</width>
+		<height>720</height>
+		<depth>3</depth>
+	</size>
+	<segmented>0</segmented>
+	<object>
+		<name>pistol</name>
+		<pose>Unspecified</pose>
+		<truncated>0</truncated>
+		<difficult>0</difficult>
+		<occluded>0</occluded>
+		<bndbox>
+			<xmin>646</xmin>
+			<xmax>706</xmax>
+			<ymin>372</ymin>
+			<ymax>420</ymax>
+		</bndbox>
+	</object>
+</annotation>

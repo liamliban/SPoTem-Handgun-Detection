@@ -1,0 +1,26 @@
+<annotation>
+	<folder>JPEGImages</folder>
+	<filename>CAR01405.jpg</filename>
+	<path>/media/pico-titanium/HDD1/data/EAAI_Test/VOC2007/JPEGImages/CAR01405.jpg</path>
+	<source>
+		<database>Unknown</database>
+	</source>
+	<size>
+		<width>235</width>
+		<height>302</height>
+		<depth>3</depth>
+	</size>
+	<segmented>0</segmented>
+	<object>
+		<name>pistol</name>
+		<pose>Unspecified</pose>
+		<truncated>0</truncated>
+		<difficult>0</difficult>
+		<bndbox>
+			<xmin>34</xmin>
+			<ymin>154</ymin>
+			<xmax>83</xmax>
+			<ymax>230</ymax>
+		</bndbox>
+	</object>
+</annotation>

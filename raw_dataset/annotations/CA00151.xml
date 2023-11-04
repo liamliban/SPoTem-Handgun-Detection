@@ -1,0 +1,26 @@
+<annotation>
+	<folder>Armas_Personas_Shooting</folder>
+	<filename>CA00151.jpg</filename>
+	<path>C:\Users\Marcus\Downloads\Base Armas\Armas_Personas_Shooting\CA00151.jpg</path>
+	<source>
+		<database>Unknown</database>
+	</source>
+	<size>
+		<width>333</width>
+		<height>431</height>
+		<depth>3</depth>
+	</size>
+	<segmented>0</segmented>
+	<object>
+		<name>pistol</name>
+		<pose>Unspecified</pose>
+		<truncated>0</truncated>
+		<difficult>0</difficult>
+		<bndbox>
+			<xmin>112</xmin>
+			<ymin>258</ymin>
+			<xmax>178</xmax>
+			<ymax>373</ymax>
+		</bndbox>
+	</object>
+</annotation>

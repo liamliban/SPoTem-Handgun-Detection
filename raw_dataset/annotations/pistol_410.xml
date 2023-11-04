@@ -1,0 +1,26 @@
+<annotation>
+	<folder>14</folder>
+	<filename>pistol_410.jpg</filename>
+	<path>pistol_410.jpg</path>
+	<source>
+		<database>Unknown</database>
+	</source>
+	<size>
+		<width>512</width>
+		<height>512</height>
+		<depth>3</depth>
+	</size>
+	<segmented>0</segmented>
+	<object>
+		<name>pistol</name>
+		<pose>Unspecified</pose>
+		<truncated>0</truncated>
+		<difficult>0</difficult>
+		<bndbox>
+			<xmin>409</xmin>
+			<ymin>335</ymin>
+			<xmax>420</xmax>
+			<ymax>367</ymax>
+		</bndbox>
+	</object>
+</annotation>

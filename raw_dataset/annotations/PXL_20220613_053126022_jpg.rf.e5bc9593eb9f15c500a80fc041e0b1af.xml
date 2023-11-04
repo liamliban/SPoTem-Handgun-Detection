@@ -1,0 +1,27 @@
+<annotation>
+	<folder></folder>
+	<filename>PXL_20220613_053126022_jpg.rf.e5bc9593eb9f15c500a80fc041e0b1af.jpg</filename>
+	<path>PXL_20220613_053126022_jpg.rf.e5bc9593eb9f15c500a80fc041e0b1af.jpg</path>
+	<source>
+		<database>roboflow.com</database>
+	</source>
+	<size>
+		<width>3024</width>
+		<height>4032</height>
+		<depth>3</depth>
+	</size>
+	<segmented>0</segmented>
+	<object>
+		<name>pistol</name>
+		<pose>Unspecified</pose>
+		<truncated>0</truncated>
+		<difficult>0</difficult>
+		<occluded>0</occluded>
+		<bndbox>
+			<xmin>1327</xmin>
+			<xmax>1451</xmax>
+			<ymin>1400</ymin>
+			<ymax>1553</ymax>
+		</bndbox>
+	</object>
+</annotation>

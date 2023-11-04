@@ -7,6 +7,7 @@ from src import model
 from src.modules import motion_analysis
 from yolo.pytorchyolo import models
 import torchvision.transforms as transforms
+from src.modules import annotator
 from src.modules.posecnn import poseCNN
 from src.modules.gun_yolo import CustomYolo
 from src.modules.combined_model import CombinedModel
@@ -16,8 +17,8 @@ device = 'cuda:0' if torch.cuda.is_available() else 'cpu'
 print("Device: " , device)
 
 # Choose dataset
-dataset_folder = 'images/dataset/'
-video_label = "5"
+dataset_folder = 'raw_dataset/dataset/'
+video_name = "5"
 
 # Folder where data are stored
 #   -gun: data/[video_label]/person_[person_id]/hand_image/
@@ -36,7 +37,7 @@ data_folder = f'./data/'
 #   -preprocessed keypoints text file (motion)
 display_animation = False
 # Path of output video folder
-output_folder = data_folder + video_label + "/"
+output_folder = data_folder + video_name + "/"
 
 # Clear folder first
 if os.path.exists(output_folder):
@@ -44,7 +45,25 @@ if os.path.exists(output_folder):
         if os.path.exists(os.path.join(output_folder, filename)):
             shutil.rmtree(output_folder, filename)
 
-num_frames, num_person = data_creator.create_data(dataset_folder, video_label, data_folder, display_animation)
+data_creator.create_data(dataset_folder, video_name, data_folder, display_animation)
+
+
+
+# folder where the generated data by data_creator is stored
+data_folder = "data/"
+
+# folder where the annotations are stored
+annotation_folder = "raw_dataset/annotations/"
+
+# Create video annotation
+video_labels = annotator.create_vid_annotation(dataset_folder, data_folder, video_name, output_folder, annotation_folder)
+
+# Save video annotation
+annotator.save_video_labels_csv(video_labels, output_folder)
+
+# Get num of frames and persons from the video labels csv file
+num_frames, num_person = data_creator.get_num_frames_person(data_folder, video_name)
+
 
 
 # Print or not print features of models
