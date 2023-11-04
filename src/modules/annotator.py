@@ -186,6 +186,7 @@ def create_vid_annotation(dataset_folder, data_folder, video_name, output_folder
     video_labels = []
 
     for frame_num in range(num_of_frames):
+        print("")
         print("FRAME NUM: ", frame_num)
         hand_regions_in_frame = hand_regions_of_vid[frame_num]
 

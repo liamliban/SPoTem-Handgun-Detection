@@ -46,6 +46,7 @@ def create_data(dataset_folder, video_label, data_folder, display_animation = Fa
 
     # Function to load and process an image frame
     def process_frame(frame_number):
+        print("")
         print("Frame Num: ", frame_number)
         image_file = image_files[frame_number]
         print(f"Processing image: {image_file}")
