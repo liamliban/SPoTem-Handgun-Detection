@@ -36,8 +36,7 @@ if os.path.exists(output_folder):
         if os.path.exists(os.path.join(output_folder, filename)):
             shutil.rmtree(output_folder, filename)
 
-num_frames, num_person = data_creator.create_data(dataset_folder, video_name, data_folder, display_animation)
-
+data_creator.create_data(dataset_folder, video_name, data_folder, display_animation)
 
 # folder where the generated data by data_creator is stored
 data_folder = "data/"
@@ -50,3 +49,6 @@ video_labels = annotator.create_vid_annotation(dataset_folder, data_folder, vide
 
 # Save video annotation
 annotator.save_video_labels_csv(video_labels, output_folder)
+
+# Get num of frames and persons from the video labels csv file
+num_frames, num_person = data_creator.get_num_frames_person(data_folder, video_name)

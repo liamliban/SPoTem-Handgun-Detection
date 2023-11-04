@@ -2,6 +2,7 @@ import cv2
 import os
 import json
 import copy
+import csv
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 from src.body import Body
@@ -192,3 +193,17 @@ def create_data(dataset_folder, video_label, data_folder, display_animation = Fa
     return num_frames, total_num_person
 
 
+def get_num_frames_person(data_folder, video_name):
+    csv_file = data_folder + video_name + "/video_labels.csv"
+
+    with open(csv_file, 'r') as file:
+        csv_reader = csv.reader(file)
+        rows = sum(1 for row in csv_reader)
+        file.seek(0)  # Reset the file pointer to the beginning
+        header = next(csv_reader)
+        columns = len(header)
+
+    num_frames = rows - 1
+    num_persons = columns - 1
+
+    return num_frames, num_persons
