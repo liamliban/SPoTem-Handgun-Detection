@@ -35,7 +35,7 @@ def _extract_hand_region(wrist, elbow):
     # Add bounding box of hand area based on wrist and elbow
     if elbow['confidence'] > 0 and wrist['confidence'] > 0:
         # approximate the position of the gun (center) by moving the wrist position further
-        extend_ratio = 0.35 # ratio of elbow to wrist distance portion to extend the wrist position
+        extend_ratio = 0.40 # ratio of elbow to wrist distance portion to extend the wrist position
         x_center = wrist['x'] + int((wrist['x'] - elbow['x']) * extend_ratio) 
         y_center = wrist['y'] + int((wrist['y'] - elbow['y']) * extend_ratio)
 
