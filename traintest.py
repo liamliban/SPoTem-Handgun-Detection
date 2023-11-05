@@ -39,7 +39,7 @@ print ("Number of label 1: ", label_1)
 # index = 1
 
 # get the 3 data from dataset sample
-data_name, gun_data, pose_data, motion_data, label = custom_dataset[index]
+# data_name, gun_data, pose_data, motion_data, label = custom_dataset[index]
 # gun_model_input = gun_data.unsqueeze(0)
 # pose_model_input = pose_data.unsqueeze(0)
 # motion_model_input = motion_data.unsqueeze(0)
