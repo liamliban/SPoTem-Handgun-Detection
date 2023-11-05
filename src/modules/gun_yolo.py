@@ -26,7 +26,7 @@ class CustomYolo(nn.Module):
         self.target_layer_index = 81
                 
         # Initialize the final linear layer
-        self.final_linear = nn.Linear(255 * 13 * 16, 20)  # Modify the input size (512) based on your target layer
+        self.final_linear = nn.Linear(255 * 13 * 13, 20)  # Modify the input size (512) based on your target layer
         
     def forward(self, x):
         # Register a hook to capture the activation of the target layer

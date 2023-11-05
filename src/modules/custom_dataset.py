@@ -69,29 +69,29 @@ class CustomGunDataset(Dataset):
                                 hand_image = cv2.imread(hand_path)
                                 hand_image = cv2.cvtColor(hand_image, cv2.COLOR_BGR2RGB)
 
-                                height, width, _ = hand_image.shape
-
-                                input_size = (416, 416)
-
-                                # Pad the image to 416x416 without distorting it
                                 original_height, original_width = hand_image.shape[:2]
-                                padding_height = max(input_size[0] - original_height, 0)
-                                padding_width = max(input_size[1] - original_width, 0)
+
+                                target_width = 416
+
+                                # Calculate the scaling factor for the width to make it 416
+                                scale_factor = target_width / original_width
+                                scaled_image = cv2.resize(hand_image, (target_width, int(original_height * scale_factor)))
+
+                                # Calculate the necessary padding for height
+                                original_height, original_width = scaled_image.shape[:2]
+                                target_height = 416
+
+                                padding_height = max(target_height - original_height, 0)
+
+                                # Calculate the top and bottom padding dimensions
                                 top = padding_height // 2
                                 bottom = padding_height - top
-                                left = padding_width // 2
-                                right = padding_width - left
-                                padded_img = cv2.copyMakeBorder(hand_image, top, bottom, left, right, cv2.BORDER_CONSTANT, value=(0, 0, 0))
 
-                                # cv2.imshow("Image Inputted to YOLOv3", padded_img)
+                                # Pad the image to achieve the final size of 416x416
+                                padded_image = cv2.copyMakeBorder(scaled_image, top, bottom, 0, 0, cv2.BORDER_CONSTANT, value=(0, 0, 0))
 
-                                # Convert the image to a PyTorch tensor
-                                # hand_image = transforms.ToTensor()(hand_image)
-                                hand_image = transforms.ToTensor()(padded_img)
-                                # print("padded", hand_image)
+                                hand_image = transforms.ToTensor()(padded_image)
 
-                                # # Add a batch dimension to the tensor
-                                # hand_image = hand_image.unsqueeze(0)
                                 gun_data = hand_image
                             
                             # POSE DATA
