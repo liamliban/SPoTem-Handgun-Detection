@@ -208,7 +208,7 @@ def create_data(dataset_folder, video_label, data_folder, display_animation = Fa
 
 
 def get_num_frames_person(data_folder, video_name):
-    csv_file = data_folder + video_name + "/video_labels.csv"
+    csv_file = os.path.join(data_folder, video_name, "video_labels.csv")
 
     with open(csv_file, 'r') as file:
         csv_reader = csv.reader(file)

@@ -20,6 +20,27 @@ def load_data(file_path, window_size):
     data = torch.tensor(data, dtype=torch.float32)
     return data
 
+# get one sequence of motion keypoint sets based on window size
+def get_one_sequence(file_path, frame_num, window_size):
+    data = []
+    with open(file_path, 'r') as file:
+        lines = file.readlines()
+
+        if len(lines) <= frame_num:
+            raise ("frame num is not in the text file!")
+
+        if window_size > len(lines):
+            return None
+        sequence = []
+        for i in range(frame_num - (window_size - 1), frame_num + 1):
+            line = lines[i].strip().split(',')
+            sequence.append([float(val) for val in line])
+        data.append(sequence)
+    data = np.array(data)
+    # transform into tensor
+    data = torch.tensor(data, dtype=torch.float32)
+    return data
+
 class MotionLSTM(nn.Module):
     def __init__(self):
         super(MotionLSTM, self).__init__()
