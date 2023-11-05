@@ -29,6 +29,10 @@ custom_dataset = CustomGunDataset(root_dir='data', video=video)
 
 print ("Number of samples in dataset: ", len(custom_dataset))
 
+
+
+# Test one sample in dataset to models
+
 index = 1
 data_name, gun_data, pose_data, motion_data, label = custom_dataset[index]
 gun_model_input = gun_data
