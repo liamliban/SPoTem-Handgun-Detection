@@ -21,22 +21,34 @@ custom_dataset = CustomGunDataset(root_dir='data')
 
 print ("Number of samples in dataset: ", len(custom_dataset))
 
+label_0 = 0
+label_1 = 0
+
+for idx, data_entry in enumerate(custom_dataset.data):
+    label = data_entry["label"]
+    if label == '0':
+        label_0+=1
+    elif label == '1':
+        label_1+=1
+
+print ("Number of label 0: ", label_0)
+print ("Number of label 1: ", label_1)
 
 
-# Test one sample in dataset to models
-index = 1
+# # Test one sample in dataset to models
+# index = 1
 
 # get the 3 data from dataset sample
 data_name, gun_data, pose_data, motion_data, label = custom_dataset[index]
-gun_model_input = gun_data.unsqueeze(0)
-pose_model_input = pose_data.unsqueeze(0)
-motion_model_input = motion_data.unsqueeze(0)
+# gun_model_input = gun_data.unsqueeze(0)
+# pose_model_input = pose_data.unsqueeze(0)
+# motion_model_input = motion_data.unsqueeze(0)
 
 
-if torch.cuda.is_available():
-    gun_model_input = gun_model_input.cuda()
-    pose_model_input = pose_model_input.cuda()
-    motion_model_input = motion_model_input.cuda()
+# if torch.cuda.is_available():
+#     gun_model_input = gun_model_input.cuda()
+#     pose_model_input = pose_model_input.cuda()
+#     motion_model_input = motion_model_input.cuda()
 
 
 # call the models
@@ -57,18 +69,20 @@ combined_model = CombinedModel(gun_model, pose_model, motion_model, combined_fea
 combined_model.to(device)
 combined_model.eval()
 
-with torch.no_grad():
-    combined_output = combined_model(gun_model_input, pose_model_input, motion_model_input)
+# with torch.no_grad():
+#     combined_output = combined_model(gun_model_input, pose_model_input, motion_model_input)
 
-print("Combined Model with Motion Output: ", combined_output)
-print("Combined Output Shape:", combined_output.shape)
+# print("Combined Model with Motion Output: ", combined_output)
+# print("Combined Output Shape:", combined_output.shape)
 
 
 # Split the dataset into training and validation sets
 train_dataset, val_dataset = train_test_split(custom_dataset, test_size=0.2, random_state=42)
 
-train_loader = DataLoader(train_dataset, batch_size=32, shuffle=True)
-val_loader = DataLoader(val_dataset, batch_size=32, shuffle=False)
+batch_size = 4
+
+train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
+val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False)
 
 criterion = torch.nn.CrossEntropyLoss()
 
@@ -78,7 +92,7 @@ optimizer = optim.Adam(combined_model.parameters(), lr=0.001)
 device = 'cuda:0' if torch.cuda.is_available() else 'cpu'
 
 # Training loop
-num_epochs = 3
+num_epochs = 10
 
 train_losses, val_losses = train_model(train_loader, val_loader, combined_model, criterion, optimizer, device, num_epochs)
 

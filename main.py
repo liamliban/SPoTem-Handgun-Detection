@@ -30,8 +30,19 @@ custom_dataset = CustomGunDataset(root_dir='data')
 
 print ("Number of samples in dataset: ", len(custom_dataset))
 
+label_0 = 0
+label_1 = 0
 
+for idx, data_entry in enumerate(custom_dataset.data):
+    label = data_entry["label"]
+    if label == '0':
+        label_0+=1
+    elif label == '1':
+        label_1+=1
 
+print ("Number of label 0: ", label_0)
+print ("Number of label 1: ", label_1)
+    
 # Test one sample in dataset to models
 index = 1
 
