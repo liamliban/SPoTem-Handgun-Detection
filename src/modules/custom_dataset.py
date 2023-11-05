@@ -70,7 +70,7 @@ class CustomGunDataset(Dataset):
 
                                 height, width, _ = hand_image.shape
 
-                                input_size = (width, width)
+                                input_size = (416, 416)
 
                                 # Pad the image to 416x416 without distorting it
                                 original_height, original_width = hand_image.shape[:2]
@@ -143,9 +143,9 @@ class CustomGunDataset(Dataset):
                             if gun_data_exist and pose_data_exist and motion_data_exist:
                                 data_entry = {
                                     "data_name": sample_name,
-                                    "gun_frame": gun_data,
-                                    "pose_frame": pose_data,
-                                    "motion_kps": motion_data,
+                                    "gun_data": gun_data,
+                                    "pose_data": pose_data,
+                                    "motion_data": motion_data,
                                     "label": data_label
                                 }
                                 self.data.append(data_entry)
@@ -162,10 +162,11 @@ class CustomGunDataset(Dataset):
     def __getitem__(self, index):
         data_entry = self.data[index]
         data_name = self.data[index].get("data_name")
-        gun_frame = self.data[index].get("gun_frame")
-        pose_frame = self.data[index].get("pose_frame")
-        motion_kps = self.data[index].get("motion_kps")
-        frame_label = self.data[index].get("label")
+        gun_data = self.data[index].get("gun_data")
+        pose_data = self.data[index].get("pose_data")
+        motion_data = self.data[index].get("motion_data")
+        label = self.data[index].get("label")
+        return data_name, gun_data, pose_data, motion_data, label
 
 def list_subfolders(main_folder_path):
     subfolders = []

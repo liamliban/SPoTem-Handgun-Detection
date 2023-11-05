@@ -69,7 +69,7 @@ num_frames, num_person = data_creator.get_num_frames_person(data_folder, video_n
 # Print or not print features of models
 print_gun_feature = False
 print_pose_feature = False
-print_motion_feature = True
+print_motion_feature = False
 
 # Load the YOLO model
 yolo_model = models.load_model("yolo/config/yolov3.cfg", "yolo/weights/yolov3.weights")
