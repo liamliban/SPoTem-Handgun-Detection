@@ -22,6 +22,7 @@ class CustomGunDataset(Dataset):
             video_names = _list_subfolders(root_dir)
         else:
             video_names.append(str(video))
+        print("video list detected by CustomGunDataset: ", video_names)
 
         # Load data entries based on the directory structure
         for video_name in video_names:
