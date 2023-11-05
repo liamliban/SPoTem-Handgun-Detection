@@ -35,7 +35,8 @@ def get_one_sequence(file_path, frame_num, window_size):
         for i in range(frame_num - (window_size - 1), frame_num + 1):
             line = lines[i].strip().split(',')
             sequence.append([float(val) for val in line])
-        data.append(sequence)
+        # data.append(sequence)
+        data=sequence
     data = np.array(data)
     # transform into tensor
     data = torch.tensor(data, dtype=torch.float32)

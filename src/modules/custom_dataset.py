@@ -90,8 +90,8 @@ class CustomGunDataset(Dataset):
                                 hand_image = transforms.ToTensor()(padded_img)
                                 # print("padded", hand_image)
 
-                                # Add a batch dimension to the tensor
-                                hand_image = hand_image.unsqueeze(0)
+                                # # Add a batch dimension to the tensor
+                                # hand_image = hand_image.unsqueeze(0)
                                 gun_data = hand_image
                             
                             # POSE DATA
@@ -102,7 +102,7 @@ class CustomGunDataset(Dataset):
                                 preprocess = transforms.Compose([ transforms.ToTensor() ])
                                 image = cv2.imread(pose_path, cv2.IMREAD_GRAYSCALE)
                                 input_image = preprocess(image)
-                                input_image = input_image.unsqueeze(0)
+                                # input_image = input_image.unsqueeze(0)
                                 pose_data = input_image
 
 
