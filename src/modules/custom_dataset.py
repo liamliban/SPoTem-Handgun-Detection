@@ -167,6 +167,10 @@ class CustomGunDataset(Dataset):
         pose_data = self.data[index].get("pose_data")
         motion_data = self.data[index].get("motion_data")
         label = self.data[index].get("label")
+
+        label = int(label)
+        label = torch.tensor(label, dtype=torch.long)
+
         return data_name, gun_data, pose_data, motion_data, label
 
 def _list_subfolders(main_folder_path):
