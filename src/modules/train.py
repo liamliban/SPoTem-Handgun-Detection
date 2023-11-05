@@ -54,4 +54,6 @@ def train_model(train_loader, val_loader, combined_model, criterion, optimizer, 
 
         combined_model.train()  # Set the model back to training mode
 
+        print(f'Epoch [{epoch+1}/{num_epochs}], Training Loss: {average_train_loss:.4f}, Validation Loss: {average_val_loss:.4f}')
+
     return train_losses, val_losses
