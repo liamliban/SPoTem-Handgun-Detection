@@ -4,12 +4,9 @@ import shutil
 import src.modules.data_creator as data_creator
 from src.modules import annotator
 
-device = 'cuda:0' if torch.cuda.is_available() else 'cpu'
-print("Device: " , device)
-
 # Choose dataset
 dataset_folder = 'raw_dataset/dataset/'
-video_name = "1"
+video_name = "14"
 
 # Folder where data are stored
 #   -gun: data/[video_label]/[person_id]/hand_image/

@@ -19,7 +19,7 @@ class CustomGunDataset(Dataset):
         
         video_names = []
         if self.video is None:
-            video_names = list_subfolders(root_dir)
+            video_names = _list_subfolders(root_dir)
         else:
             video_names.append(str(video))
 
@@ -168,8 +168,19 @@ class CustomGunDataset(Dataset):
         label = self.data[index].get("label")
         return data_name, gun_data, pose_data, motion_data, label
 
-def list_subfolders(main_folder_path):
+def _list_subfolders(main_folder_path):
     subfolders = []
+
+    # Custom sorting key function
+    def custom_sort_key(item):
+        # Split the string into parts using underscores
+        parts = item.split('_')
+        if len(parts) == 3:
+            # For numeric strings, return a tuple (0, int) to sort them first
+            return (1, int(parts[2]))
+        else:
+            # For alphanumeric strings, return a tuple (1, int) to sort them after the numeric ones
+            return (0, int(parts[-1]))
     
     # Check if the main folder path exists
     if os.path.exists(main_folder_path) and os.path.isdir(main_folder_path):
@@ -178,7 +189,7 @@ def list_subfolders(main_folder_path):
             if os.path.isdir(folder_path):
                 subfolders.append(folder_name)
     
-    return subfolders
+    return sorted(subfolders, key=custom_sort_key)
 
 
 
