@@ -69,7 +69,7 @@ num_frames, num_person = data_creator.get_num_frames_person(data_folder, video_n
 # Print or not print features of models
 print_gun_feature = False
 print_pose_feature = False
-print_motion_feature = False
+print_motion_feature = True
 
 # Load the YOLO model
 yolo_model = models.load_model("yolo/config/yolov3.cfg", "yolo/weights/yolov3.weights")
@@ -206,12 +206,6 @@ for person_num in range(num_person):
                 if torch.cuda.is_available():
                     motion_model_input = motion_model_input.cuda()
                 print("\t\tInput shape: " , motion_model_input.shape)
-
-                # Define the model and specify hyperparameters
-                input_size = 36
-                hidden_size = 64
-                num_layers = 1
-                output_size = 1
 
                 motion_model = motion_analysis.MotionLSTM()
                 motion_model.to(device)

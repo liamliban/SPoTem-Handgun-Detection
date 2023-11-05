@@ -179,11 +179,25 @@ def create_data(dataset_folder, video_label, data_folder, display_animation = Fa
         for frame in range(num_frames):
             process_frame(frame)
         
+    # # Save the keypoints data to a JSON file
+    # output_json_file = 'keypoints_data.json'
+    # with open(output_json_file, 'w') as json_file:
+    #     json.dump(keypoints_data, json_file, indent=4)
+    # print(f"Keypoints data saved to {output_json_file}")
+
+    # # Save the normalized keypoints data to a JSON file
+    # test = normalized_keypoints_data
+    # output_json_file = 'normalized_keypoints_data.json'
+    # with open(output_json_file, 'w') as json_file:
+    #     json.dump(test, json_file, indent=4)
+    # print(f"Keypoints data saved to {output_json_file}")
+
+
 
     print("total num person: " , total_num_person)
 
-    # create motion preprocessed data txt file for each person in video
     for person_id in range(total_num_person):
+        # create motion preprocessed data txt file for each person in video
         motion_folder = output_folder + "person_" + str(person_id) + "/motion_keypoints/"
         motion_preprocess.preprocess_data(normalized_keypoints_data, person_id, motion_folder)
 

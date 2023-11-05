@@ -20,13 +20,16 @@ def _get_normalized(normalized_keypoints, person_id, null_value):
     for frame_data in normalized_keypoints: 
         keypoints = frame_data.get("keypoints") #each frame data has "keypoints" (keypoints of all persons)
 
-        if len(keypoints) == 0: #if person_id is not detected on the frame
+        if len(keypoints) == 0: #if no person detected on the frame
             keypoint_sequences.append([null_value] * 36)
         else:
-            for person_data in keypoints:
-                keypoint_set = []
+            keypoint_set = []
 
-                if person_data is not None and person_data.get("person_id") == person_id:
+            person_id_found = False
+            for person_data in keypoints: #check all persons in the frame
+                #if person id match, get keypoint set
+                if person_data.get("person_id") == person_id: 
+                    person_id_found = True
                     person_keypoints = person_data.get("keypoints")
 
                     for keypoint in person_keypoints:
@@ -40,11 +43,15 @@ def _get_normalized(normalized_keypoints, person_id, null_value):
 
                         keypoint_set.extend([x, y])
                     # print("keypoint set if yes: " , keypoint_set)
-                else:
-                    keypoint_set = [null_value] * 36
-                    # print("keypoint set if no: " , keypoint_set)
+                    
+                    break #stop looking for person id if already found
 
-                keypoint_sequences.append(keypoint_set)
+            # if person id is not found, add null values
+            if not person_id_found:
+                keypoint_set = [null_value] * 36
+
+                
+            keypoint_sequences.append(keypoint_set)
     return keypoint_sequences
 
 # takes a keypoints_sequence and save it into a text file
