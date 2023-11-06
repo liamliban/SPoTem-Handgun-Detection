@@ -1,5 +1,6 @@
 import torch
 import torch.nn as nn
+from yolo.pytorchyolo import models
 from src import model
 
 class CombinedModel(nn.Module):

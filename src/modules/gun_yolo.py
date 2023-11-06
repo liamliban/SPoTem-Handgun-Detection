@@ -53,6 +53,31 @@ class CustomYolo(nn.Module):
         dense = x
         
         return dense
+    
+
+class CustomDarknet53(nn.Module):
+    def __init__(self, darknet_model):
+        super(CustomDarknet53, self).__init__()
+
+        # Load the pretrained darknet53 model
+        self.darknet = darknet_model
+
+        # Remove the last linear layer
+        self.darknet2 = torch.nn.Sequential(*list(self.darknet.children())[:-1])
+
+        # freeze all parameters of the model
+        for param in self.darknet2.parameters():
+            param.requires_grad = False
+
+        # Add a final linear layer
+        self.dense = nn.Linear(1024, 20)
+
+    def forward(self, x):
+        x = self.darknet2(x)
+        x = self.dense(x)
+        return x
+
+
 
 class Conv(nn.Module):
     def __init__(self, c1, c2, k=1, s=1, p=None, g=1, act=True):

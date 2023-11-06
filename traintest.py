@@ -3,7 +3,7 @@ from src.modules import motion_analysis
 from yolo.pytorchyolo import models
 import torchvision.transforms as transforms
 from src.modules.posecnn import poseCNN
-from src.modules.gun_yolo import CustomYolo
+from src.modules.gun_yolo import CustomYolo, CustomDarknet53
 from src.modules.combined_model import CombinedModel
 from src.modules.combined_model_no_motion import CombinedModelNoMotion
 from src.modules.custom_dataset import CustomGunDataset
@@ -13,6 +13,7 @@ import torch.optim as optim
 from sklearn.model_selection import train_test_split
 import matplotlib.pyplot as plt
 import seaborn as sns
+from holocron.models import darknet53
 
 device = 'cuda:0' if torch.cuda.is_available() else 'cpu'
 print("Device: " , device)
@@ -35,25 +36,12 @@ print ("Number of label 0: ", label_0)
 print ("Number of label 1: ", label_1)
 
 
-# # Test one sample in dataset to models
-# index = 1
-
-# get the 3 data from dataset sample
-# data_name, gun_data, pose_data, motion_data, label = custom_dataset[index]
-# gun_model_input = gun_data.unsqueeze(0)
-# pose_model_input = pose_data.unsqueeze(0)
-# motion_model_input = motion_data.unsqueeze(0)
-
-
-# if torch.cuda.is_available():
-#     gun_model_input = gun_model_input.cuda()
-#     pose_model_input = pose_model_input.cuda()
-#     motion_model_input = motion_model_input.cuda()
-
 
 # call the models
-yolo_model = models.load_model("yolo/config/yolov3.cfg", "yolo/weights/yolov3.weights")
-gun_model = CustomYolo(yolo_model)
+# yolo_model = models.load_model("yolo/config/yolov3.cfg", "yolo/weights/yolov3.weights")
+# gun_model = CustomYolo(yolo_model)
+darknet_model = darknet53(pretrained=True)
+gun_model = CustomDarknet53(darknet_model)
 
 pose_model = poseCNN()
 
@@ -69,11 +57,7 @@ combined_model = CombinedModel(gun_model, pose_model, motion_model, combined_fea
 combined_model.to(device)
 combined_model.eval()
 
-# with torch.no_grad():
-#     combined_output = combined_model(gun_model_input, pose_model_input, motion_model_input)
 
-# print("Combined Model with Motion Output: ", combined_output)
-# print("Combined Output Shape:", combined_output.shape)
 
 
 # Split the dataset into training and validation sets

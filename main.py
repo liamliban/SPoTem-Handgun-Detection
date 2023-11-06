@@ -3,10 +3,11 @@ from src.modules import motion_analysis
 from yolo.pytorchyolo import models
 import torchvision.transforms as transforms
 from src.modules.posecnn import poseCNN
-from src.modules.gun_yolo import CustomYolo
+from src.modules.gun_yolo import CustomYolo, CustomDarknet53
 from src.modules.combined_model import CombinedModel
 from src.modules.combined_model_no_motion import CombinedModelNoMotion
 from src.modules.custom_dataset import CustomGunDataset
+from holocron.models import darknet53
 
 device = 'cuda:0' if torch.cuda.is_available() else 'cpu'
 print("Device: " , device)
@@ -59,8 +60,10 @@ if torch.cuda.is_available():
 
 
 # call the models
-yolo_model = models.load_model("yolo/config/yolov3.cfg", "yolo/weights/yolov3.weights")
-gun_model = CustomYolo(yolo_model)
+# yolo_model = models.load_model("yolo/config/yolov3.cfg", "yolo/weights/yolov3.weights")
+# gun_model = CustomYolo(yolo_model)
+darknet_model = darknet53(pretrained=True)
+gun_model = CustomDarknet53(darknet_model)
 
 pose_model = poseCNN()
 
