@@ -50,14 +50,25 @@ motion_model = motion_analysis.MotionLSTM()
 
 
 # combined model
-combined_feature_size = 20 + 20 + 20 #total num of features of 3 model outputs
-combined_model = CombinedModel(gun_model, pose_model, motion_model, combined_feature_size)
+#combined_feature_size = 20 + 20 + 20 #total num of features of 3 model outputs
+#combined_model = CombinedModel(gun_model, pose_model, motion_model, combined_feature_size)
+user_input =  0
+while True:
+    user_input = input("Do you want to train all three models (1) or without motion (2)? Enter '1' or '2': ").strip().upper()
+    if user_input == '1':
+        combined_feature_size = 20 + 20 + 20 #total num of features of 3 model outputs
+        combined_model = CombinedModel(gun_model, pose_model, motion_model, combined_feature_size)
+        break
+    elif user_input == '2':
+        combined_feature_size = 20 + 20 #total num of features of 3 model outputs
+        combined_model = CombinedModelNoMotion(gun_model, pose_model, combined_feature_size)
+        break
+    else:
+        print("Invalid input. Please enter '1' for all three models or '2' for combined model with no motion.")
 
 
 combined_model.to(device)
 combined_model.eval()
-
-
 
 
 # Split the dataset into training and validation sets
@@ -78,7 +89,7 @@ device = 'cuda:0' if torch.cuda.is_available() else 'cpu'
 # Training loop
 num_epochs = 10
 
-train_losses, val_losses = train_model(train_loader, val_loader, combined_model, criterion, optimizer, device, num_epochs)
+train_losses, val_losses = train_model(user_input, train_loader, val_loader, combined_model, criterion, optimizer, device, num_epochs)
 
 # Add the visualization code here
 plt.plot(train_losses, label='Training Loss')

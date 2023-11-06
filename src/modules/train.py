@@ -4,7 +4,7 @@ from torch.utils.data import DataLoader
 import time
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, confusion_matrix
 
-def train_model(train_loader, val_loader, combined_model, criterion, optimizer, device, num_epochs):
+def train_model(user_input, train_loader, val_loader, combined_model, criterion, optimizer, device, num_epochs):
     train_losses = []  # To store training losses for each epoch
     val_losses = []    # To store validation losses for each epoch
 
@@ -30,7 +30,10 @@ def train_model(train_loader, val_loader, combined_model, criterion, optimizer, 
 
             optimizer.zero_grad()
 
-            combined_output = combined_model(gun_data, pose_data, motion_data)
+            if user_input == '1':
+                combined_output = combined_model(gun_data, pose_data, motion_data)
+            elif user_input == '2':
+                combined_output = combined_model(gun_data, pose_data)  # New line for CombinedWithNoMotion
 
             _, predicted = torch.max(combined_output, 1)  # Get the class with the highest probability
             total += target_labels.size(0)  # Accumulate the total number of examples
@@ -69,9 +72,11 @@ def train_model(train_loader, val_loader, combined_model, criterion, optimizer, 
                 pose_data = pose_data.to(device)
                 motion_data = motion_data.to(device)
                 target_labels = target_labels.to(device)
-
-                combined_output = combined_model(gun_data, pose_data, motion_data)
-
+                
+                if user_input == '1':
+                    combined_output = combined_model(gun_data, pose_data, motion_data)
+                if user_input == '2':
+                    combined_output = combined_model(gun_data, pose_data)
                 _, predicted = torch.max(combined_output, 1)  # Get the class with the highest probability
                 total += target_labels.size(0)  # Accumulate the total number of examples
                 correct += (predicted == target_labels).sum().item()  # Count correct predictions
