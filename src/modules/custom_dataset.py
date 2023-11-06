@@ -90,6 +90,10 @@ class CustomGunDataset(Dataset):
                                 # Pad the image to achieve the final size of 416x416
                                 padded_image = cv2.copyMakeBorder(scaled_image, top, bottom, 0, 0, cv2.BORDER_CONSTANT, value=(0, 0, 0))
 
+
+                                # TEMPORARY: resize the image to 224
+                                padded_image = cv2.resize(padded_image, (224,224))
+
                                 hand_image = transforms.ToTensor()(padded_image)
 
                                 gun_data = hand_image

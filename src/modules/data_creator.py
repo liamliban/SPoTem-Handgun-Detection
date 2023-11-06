@@ -124,7 +124,7 @@ def create_data(dataset_folder, video_label, data_folder, display_animation = Fa
             
 
             # display the hand region image
-            if display_animation:
+            if display_animation and handregion_image is not None:
                 cv2.imshow("hand region image", handregion_image)
 
             # create and save the binary pose image
