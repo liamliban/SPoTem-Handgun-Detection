@@ -3,8 +3,11 @@ import torch.optim as optim
 from torch.utils.data import DataLoader
 import time
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, confusion_matrix
+import pandas as pd
+import os
+from datetime import datetime
 
-def train_model(user_input, train_loader, val_loader, combined_model, criterion, optimizer, device, num_epochs):
+def train_model(user_input, train_loader, val_loader, combined_model, criterion, optimizer, device, num_epochs, excel_filename):
     train_losses = []  # To store training losses for each epoch
     val_losses = []    # To store validation losses for each epoch
 
@@ -105,4 +108,60 @@ def train_model(user_input, train_loader, val_loader, combined_model, criterion,
         print("Validation Precision: {:.4f}, Validation Recall: {:.4f}, Validation F1 Score: {:.4f}".format(val_precision, val_recall, val_f1_score))
         print()
 
+    # Get the current date and time
+    current_datetime = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    # Get the run number based on the existing Excel file
+    run_number = 1
+    if os.path.exists(excel_filename):
+        existing_df = pd.read_excel(excel_filename)
+        run_number = len(existing_df) + 1
+
+    # Save the results to Excel with run number and date
+    write_results_to_excel(excel_filename, run_number, current_datetime, user_input, num_epochs, train_accuracy, train_precision, train_recall, train_f1_score, val_accuracy, val_precision, val_recall, val_f1_score, train_losses, val_losses)
+
     return train_losses, val_losses
+
+# Function to write the results to Excel
+def write_results_to_excel(filename, run_number, current_datetime, user_input, num_epochs, train_accuracy, train_precision, train_recall, train_f1, val_accuracy, val_precision, val_recall, val_f1, train_losses, val_losses):
+    if not os.path.exists(filename):
+        df = pd.DataFrame(columns=["Run #", "Date", "Model", "Epochs", "Train Accuracy", "Train Loss", "Train Precision", "Train Recall", "Train F1", "Val Accuracy", "Val Loss", "Val Precision", "Val Recall", "Val F1"])
+    else:
+        df = pd.read_excel(filename)
+    model = ''
+    if user_input == '1':
+        model = 'GPM'
+    elif user_input == '2':
+        model = 'GP'
+
+    # Format the accuracy with 2 decimal points and others with at most 4 decimal points
+    train_accuracy_str = "{:.2f}%".format(train_accuracy)
+    train_precision_str = "{:.4f}".format(train_precision)
+    train_recall_str = "{:.4f}".format(train_recall)
+    train_f1_str = "{:.4f}".format(train_f1)
+    val_accuracy_str = "{:.2f}%".format(val_accuracy)
+    val_precision_str = "{:.4f}".format(val_precision)
+    val_recall_str = "{:.4f}".format(val_recall)
+    val_f1_str = "{:.4f}".format(val_f1)
+    train_loss_str = "{:.4f}".format(train_losses[-1]) 
+    val_loss_str = "{:.4f}".format(val_losses[-1])
+
+    new_row = pd.Series({"Run #": run_number,
+                         "Date": current_datetime,
+                         "Model": model,
+                         "Epochs": num_epochs,
+                         "Train Accuracy": train_accuracy_str,
+                         "Train Loss": train_loss_str,
+                         "Train Precision": train_precision_str,
+                         "Train Recall": train_recall_str,
+                         "Train F1": train_f1_str,
+                         "Val Accuracy": val_accuracy_str,
+                         "Val Loss": val_loss_str,
+                         "Val Precision": val_precision_str,
+                         "Val Recall": val_recall_str,
+                         "Val F1": val_f1_str})
+
+    df = df.append(new_row, ignore_index=True)
+    df.to_excel(filename, index=False)
+
+    print ("Results saved to: ", filename)
+

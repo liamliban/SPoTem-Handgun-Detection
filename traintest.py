@@ -89,7 +89,9 @@ device = 'cuda:0' if torch.cuda.is_available() else 'cpu'
 # Training loop
 num_epochs = 10
 
-train_losses, val_losses = train_model(user_input, train_loader, val_loader, combined_model, criterion, optimizer, device, num_epochs)
+excel_filename = 'results.xlsx'
+
+train_losses, val_losses = train_model(user_input, train_loader, val_loader, combined_model, criterion, optimizer, device, num_epochs, excel_filename)
 
 # Add the visualization code here
 plt.plot(train_losses, label='Training Loss')
