@@ -19,6 +19,8 @@ def train_model(user_input, train_loader, val_loader, combined_model, criterion,
         existing_df = pd.read_excel(excel_filename)
         run_number = len(existing_df) + 1
     
+    willSave = input("Do you want to save the model? [y/n]: ").strip().lower() == 'y'
+
     print("")
     print("Training Started: ")
 
@@ -117,18 +119,19 @@ def train_model(user_input, train_loader, val_loader, combined_model, criterion,
         print()
 
         # Save Model
-        model_checkpoint = {
-            'epoch': epoch,
-            'model_state_dict': combined_model.state_dict(),
-            'optimizer_state_dict': optimizer.state_dict(),
-            'loss': loss,
-        }
-        model_type = 'GPM' if user_input == '1' else 'GP'
-        model_folder = f'logs/models/{model_type}/{run_number}/'
-        if not os.path.exists(model_folder):
-            os.makedirs(model_folder)
-        model_path = f'{model_folder}model_epoch_{epoch}.pt'
-        torch.save(model_checkpoint, model_path)
+        if willSave:
+            model_checkpoint = {
+                'epoch': epoch,
+                'model_state_dict': combined_model.state_dict(),
+                'optimizer_state_dict': optimizer.state_dict(),
+                'loss': loss,
+            }
+            model_type = 'GPM' if user_input == '1' else 'GP'
+            model_folder = f'logs/models/{model_type}/{run_number}/'
+            if not os.path.exists(model_folder):
+                os.makedirs(model_folder)
+            model_path = f'{model_folder}model_epoch_{epoch}.pt'
+            torch.save(model_checkpoint, model_path)
 
     
 
