@@ -35,8 +35,6 @@ for idx, data_entry in enumerate(custom_dataset.data):
 print ("Number of label 0: ", label_0)
 print ("Number of label 1: ", label_1)
 
-
-
 # call the models
 # yolo_model = models.load_model("yolo/config/yolov3.cfg", "yolo/weights/yolov3.weights")
 # gun_model = CustomYolo(yolo_model)
@@ -46,8 +44,6 @@ gun_model = CustomDarknet53(darknet_model)
 pose_model = poseCNN()
 
 motion_model = motion_analysis.MotionLSTM()
-
-
 
 # combined model
 #combined_feature_size = 20 + 20 + 20 #total num of features of 3 model outputs
@@ -91,6 +87,18 @@ device = 'cuda:0' if torch.cuda.is_available() else 'cpu'
 num_epochs = 1
 
 excel_filename = 'logs/results.xlsx'
+
+# Print Hyperparameters
+print(f'''
+    Train Set Size: {len(train_dataset)}
+    Val Set Size  : {len(val_dataset)}
+    Test Set Size : {len(test_dataset)}
+    Batch Size    : {batch_size}
+    Criterion     : {criterion.__class__.__name__}
+    Optimizer     : {optimizer.__class__.__name__}
+    Learning Rate : {optimizer.param_groups[0]['lr']}
+    Epochs        : {num_epochs}
+''')
 
 train_losses, val_losses, test_losses = train_model(user_input, train_loader, val_loader, test_loader, combined_model, criterion, optimizer, device, num_epochs, excel_filename)
 
