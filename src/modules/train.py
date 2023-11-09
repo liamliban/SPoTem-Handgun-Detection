@@ -7,12 +7,13 @@ import pandas as pd
 import os
 from datetime import datetime
 
-def train_model(user_input, train_loader, val_loader, combined_model, criterion, optimizer, device, num_epochs, excel_filename):
+def train_model(user_input, train_loader, val_loader, test_loader, combined_model, criterion, optimizer, device, num_epochs, excel_filename):
     train_losses = []  # To store training losses for each epoch
     val_losses = []    # To store validation losses for each epoch
+    test_losses = []   # To store test losses for each epoch
 
     # Get the current date and time
-    current_datetime = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    current_datetime = datetime.now().strftime('%Y-%m-d %H:%M:%S')
     # Get the run number based on the existing Excel file
     run_number = 1
     if os.path.exists(excel_filename):
@@ -111,11 +112,54 @@ def train_model(user_input, train_loader, val_loader, combined_model, criterion,
         average_val_loss = total_val_loss / len(val_loader)
         val_losses.append(average_val_loss)
 
-        combined_model.train()  # Set the model back to training mode
+        # Test loop
+        combined_model.eval()
+        total_test_loss = 0
+        correct = 0
+        total = 0
+        test_predictions = []
+        test_targets = []
 
-        print("Epoch [{}/{}], Training Accuracy: {:.2f}%, Training Loss: {:.4f}, Validation Accuracy: {:.2f}%, Validation Loss: {:.4f}, Time: {:.2f} seconds".format(epoch + 1, num_epochs, train_accuracy, average_train_loss, val_accuracy, average_val_loss, epoch_time))
+        with torch.no_grad():
+            for batch in test_loader:
+                data_name, gun_data, pose_data, motion_data, target_labels = batch
+
+                gun_data = gun_data.to(device)
+                pose_data = pose_data.to(device)
+                motion_data = motion_data.to(device)
+                target_labels = target_labels.to(device)
+
+                if user_input == '1':
+                    combined_output = combined_model(gun_data, pose_data, motion_data)
+                elif user_input == '2':
+                    combined_output = combined_model(gun_data, pose_data)
+                _, predicted = torch.max(combined_output, 1)
+                total += target_labels.size(0)
+                correct += (predicted == target_labels).sum().item()
+
+                test_loss = criterion(combined_output, target_labels)
+                total_test_loss += test_loss.item()
+                test_predictions.extend(predicted.cpu().numpy())
+                test_targets.extend(target_labels.cpu().numpy())
+
+        test_accuracy = 100 * correct / total
+        test_precision = precision_score(test_targets, test_predictions, average='weighted')
+        test_recall = recall_score(test_targets, test_predictions, average='weighted')
+        test_f1_score = f1_score(test_targets, test_predictions, average='weighted')
+        test_confusion_matrix = confusion_matrix(test_targets, test_predictions)
+
+        average_test_loss = total_test_loss / len(test_loader)
+        test_losses.append(average_test_loss)
+
+        combined_model.train()
+
+        end_time = time.time()
+        epoch_time = end_time - start_time
+
+        print("Epoch [{}/{}], Training Accuracy: {:.2f}%, Training Loss: {:.4f}, Validation Accuracy: {:.2f}%, Validation Loss: {:.4f}, Test Accuracy: {:.2f}%, Test Loss: {:.4f}, Time: {:.2f} seconds".format(epoch + 1, num_epochs, train_accuracy, average_train_loss, val_accuracy, average_val_loss, test_accuracy, average_test_loss, epoch_time))
         print("Training Precision: {:.4f}, Training Recall: {:.4f}, Training F1 Score: {:.4f}".format(train_precision, train_recall, train_f1_score))
         print("Validation Precision: {:.4f}, Validation Recall: {:.4f}, Validation F1 Score: {:.4f}".format(val_precision, val_recall, val_f1_score))
+        print("Test Precision: {:.4f}, Test Recall: {:.4f}, Test F1 Score: {:.4f}".format(test_precision, test_recall, test_f1_score))
         print()
 
         # Save Model
@@ -133,17 +177,16 @@ def train_model(user_input, train_loader, val_loader, combined_model, criterion,
             model_path = f'{model_folder}model_epoch_{epoch}.pt'
             torch.save(model_checkpoint, model_path)
 
-    
-
     # Save the results to Excel with run number and date
-    write_results_to_excel(excel_filename, run_number, current_datetime, user_input, num_epochs, train_accuracy, train_precision, train_recall, train_f1_score, val_accuracy, val_precision, val_recall, val_f1_score, train_losses, val_losses)
+    write_results_to_excel(excel_filename, run_number, current_datetime, user_input, num_epochs, train_accuracy, train_precision, train_recall, train_f1_score, val_accuracy, val_precision, val_recall, val_f1_score, test_accuracy, test_precision, test_recall, test_f1_score, train_losses, val_losses, test_losses)
 
-    return train_losses, val_losses
+    return train_losses, val_losses, test_losses
+
 
 # Function to write the results to Excel
-def write_results_to_excel(filename, run_number, current_datetime, user_input, num_epochs, train_accuracy, train_precision, train_recall, train_f1, val_accuracy, val_precision, val_recall, val_f1, train_losses, val_losses):
+def write_results_to_excel(filename, run_number, current_datetime, user_input, num_epochs, train_accuracy, train_precision, train_recall, train_f1, val_accuracy, val_precision, val_recall, val_f1, test_accuracy, test_precision, test_recall, test_f1, train_losses, val_losses, test_losses):
     if not os.path.exists(filename):
-        df = pd.DataFrame(columns=["Run #", "Date", "Model", "Epochs", "Train Accuracy", "Train Loss", "Train Precision", "Train Recall", "Train F1", "Val Accuracy", "Val Loss", "Val Precision", "Val Recall", "Val F1"])
+        df = pd.DataFrame(columns=["Run #", "Date", "Model", "Epochs", "Train Accuracy", "Train Loss", "Train Precision", "Train Recall", "Train F1", "Val Accuracy", "Val Loss", "Val Precision", "Val Recall", "Val F1", "Test Accuracy", "Test Loss", "Test Precision", "Test Recall", "Test F1"])
     else:
         df = pd.read_excel(filename)
     model = ''
@@ -161,8 +204,13 @@ def write_results_to_excel(filename, run_number, current_datetime, user_input, n
     val_precision_str = "{:.4f}".format(val_precision)
     val_recall_str = "{:.4f}".format(val_recall)
     val_f1_str = "{:.4f}".format(val_f1)
-    train_loss_str = "{:.4f}".format(train_losses[-1]) 
+    test_accuracy_str = "{:.2f}%".format(test_accuracy)
+    test_precision_str = "{:.4f}".format(test_precision)
+    test_recall_str = "{:.4f}".format(test_recall)
+    test_f1_str = "{:.4f}".format(test_f1)
+    train_loss_str = "{:.4f}".format(train_losses[-1])
     val_loss_str = "{:.4f}".format(val_losses[-1])
+    test_loss_str = "{:.4f}".format(test_losses[-1])
 
     new_row = pd.Series({"Run #": run_number,
                          "Date": current_datetime,
@@ -177,11 +225,15 @@ def write_results_to_excel(filename, run_number, current_datetime, user_input, n
                          "Val Loss": val_loss_str,
                          "Val Precision": val_precision_str,
                          "Val Recall": val_recall_str,
-                         "Val F1": val_f1_str})
+                         "Val F1": val_f1_str,
+                         "Test Accuracy": test_accuracy_str,
+                         "Test Loss": test_loss_str,
+                         "Test Precision": test_precision_str,
+                         "Test Recall": test_recall_str,
+                         "Test F1": test_f1_str})
 
     df = df.append(new_row, ignore_index=True)
-    #df = pd.concat([df, pd.DataFrame([new_row])], ignore_index=True)
     df.to_excel(filename, index=False)
 
-    print ("Results saved to: ", filename)
+    print("Results saved to: ", filename)
 

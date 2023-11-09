@@ -71,13 +71,15 @@ combined_model.to(device)
 combined_model.eval()
 
 
-# Split the dataset into training and validation sets
-train_dataset, val_dataset = train_test_split(custom_dataset, test_size=0.2, random_state=42)
+# Split the dataset into training, validation, and test sets
+train_dataset, temp_dataset = train_test_split(custom_dataset, test_size=0.2, random_state=42)
+val_dataset, test_dataset = train_test_split(temp_dataset, test_size=0.5, random_state=42)
 
 batch_size = 4
 
 train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
 val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False)
+test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
 
 criterion = torch.nn.CrossEntropyLoss()
 optimizer = optim.Adam(combined_model.parameters(), lr=0.001)
@@ -90,11 +92,12 @@ num_epochs = 1
 
 excel_filename = 'logs/results.xlsx'
 
-train_losses, val_losses = train_model(user_input, train_loader, val_loader, combined_model, criterion, optimizer, device, num_epochs, excel_filename)
+train_losses, val_losses, test_losses = train_model(user_input, train_loader, val_loader, test_loader, combined_model, criterion, optimizer, device, num_epochs, excel_filename)
 
 # Add the visualization code here
 plt.plot(train_losses, label='Training Loss')
 plt.plot(val_losses, label='Validation Loss')
+plt.plot(test_losses, label='Test Loss')
 plt.xlabel('Epoch')
 plt.ylabel('Loss')
 plt.legend()
