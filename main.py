@@ -86,7 +86,7 @@ optimizer = optim.Adam(combined_model.parameters(), lr=0.001)
 device = 'cuda:0' if torch.cuda.is_available() else 'cpu'
 
 # Training loop
-num_epochs = 10
+num_epochs = 1
 
 excel_filename = 'logs/results.xlsx'
 
