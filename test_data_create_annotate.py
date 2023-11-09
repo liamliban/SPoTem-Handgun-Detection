@@ -44,8 +44,9 @@ annotation_folder = "raw_dataset/annotations/"
 # Create video annotation
 video_labels = annotator.create_vid_annotation(dataset_folder, data_folder, video_name, output_folder, annotation_folder)
 
-# Save video annotation
-annotator.save_video_labels_csv(video_labels, output_folder)
+if video_labels is not None:
+    # Save video annotation
+    annotator.save_video_labels_csv(video_labels, output_folder)
 
-# Get num of frames and persons from the video labels csv file
-num_frames, num_person = data_creator.get_num_frames_person(data_folder, video_name)
+    # Get num of frames and persons from the video labels csv file
+    num_frames, num_person = data_creator.get_num_frames_person(data_folder, video_name)

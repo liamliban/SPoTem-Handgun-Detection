@@ -1,3 +1,4 @@
+import os
 import cv2
 
 # Main function
@@ -65,11 +66,16 @@ def _extract_hand_region(wrist, elbow):
     if elbow['confidence'] > 0 and wrist['confidence'] > 0:
         # approximate the position of the gun (center) by moving the wrist position further
         extend_ratio = 0.40 # ratio of elbow to wrist distance portion to extend the wrist position
+        # extend_ratio = 0.70
         x_center = wrist['x'] + int((wrist['x'] - elbow['x']) * extend_ratio) 
         y_center = wrist['y'] + int((wrist['y'] - elbow['y']) * extend_ratio)
 
+        # scale_ratio = 0.6
+        scale_ratio = 1
         radius = max(abs(x_center - elbow['x']),
                     abs(y_center - elbow['y']))
+        radius = int(radius * scale_ratio)
+
         x_min = x_center - radius
         y_min = y_center - radius
         x_max = x_center + radius
@@ -133,7 +139,8 @@ def save_hand_regions_txt(output_folder, hand_regions_of_vid):
 
     hand_regions_txt_path = output_folder + "hand_regions_coords.txt"
 
-    with open(hand_regions_txt_path, 'w') as text_file:
-        text_file.write(string + '\n')
+    if os.path.exists(output_folder):
+        with open(hand_regions_txt_path, 'w') as text_file:
+            text_file.write(string + '\n')
 
-    print("Hand regions coordiantes stored in: ", hand_regions_txt_path)
+        print("Hand regions coordiantes stored in: ", hand_regions_txt_path)

@@ -63,17 +63,15 @@ def _create_annotate_video(dataset_folder, data_folder, video_name):
 
     data_creator.create_data(dataset_folder, video_name, data_folder, display_animation)
 
-    # folder where the generated data by data_creator is stored
-    data_folder = "data/"
-
     # folder where the annotations are stored
     annotation_folder = "raw_dataset/annotations/"
 
     # Create video annotation
     video_labels = annotator.create_vid_annotation(dataset_folder, data_folder, video_name, output_folder, annotation_folder)
 
-    # Save video annotation
-    annotator.save_video_labels_csv(video_labels, output_folder)
+    if video_labels is not None:
+        # Save video annotation
+        annotator.save_video_labels_csv(video_labels, output_folder)
 
 
 

@@ -172,6 +172,9 @@ def create_vid_annotation(dataset_folder, data_folder, video_name, output_folder
     
     hand_regions_txt = data_video_folder + "hand_regions_coords.txt"
 
+    if not os.path.exists(hand_regions_txt):
+        return None
+
     # Get hand_regions element: hand_regions_of_vid[frame_num][person_id]
     hand_regions_of_vid = read_hand_regions_txt(hand_regions_txt)
 
