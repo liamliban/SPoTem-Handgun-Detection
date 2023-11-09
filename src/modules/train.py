@@ -11,6 +11,14 @@ def train_model(user_input, train_loader, val_loader, combined_model, criterion,
     train_losses = []  # To store training losses for each epoch
     val_losses = []    # To store validation losses for each epoch
 
+    # Get the current date and time
+    current_datetime = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    # Get the run number based on the existing Excel file
+    run_number = 1
+    if os.path.exists(excel_filename):
+        existing_df = pd.read_excel(excel_filename)
+        run_number = len(existing_df) + 1
+    
     print("")
     print("Training Started: ")
 
@@ -108,13 +116,21 @@ def train_model(user_input, train_loader, val_loader, combined_model, criterion,
         print("Validation Precision: {:.4f}, Validation Recall: {:.4f}, Validation F1 Score: {:.4f}".format(val_precision, val_recall, val_f1_score))
         print()
 
-    # Get the current date and time
-    current_datetime = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-    # Get the run number based on the existing Excel file
-    run_number = 1
-    if os.path.exists(excel_filename):
-        existing_df = pd.read_excel(excel_filename)
-        run_number = len(existing_df) + 1
+        # Save Model
+        model_checkpoint = {
+            'epoch': epoch,
+            'model_state_dict': combined_model.state_dict(),
+            'optimizer_state_dict': optimizer.state_dict(),
+            'loss': loss,
+        }
+        model_type = 'GPM' if user_input == '1' else 'GP'
+        model_folder = f'logs/models/{model_type}/{run_number}/'
+        if not os.path.exists(model_folder):
+            os.makedirs(model_folder)
+        model_path = f'{model_folder}model_epoch_{epoch}.pt'
+        torch.save(model_checkpoint, model_path)
+
+    
 
     # Save the results to Excel with run number and date
     write_results_to_excel(excel_filename, run_number, current_datetime, user_input, num_epochs, train_accuracy, train_precision, train_recall, train_f1_score, val_accuracy, val_precision, val_recall, val_f1_score, train_losses, val_losses)
@@ -161,6 +177,7 @@ def write_results_to_excel(filename, run_number, current_datetime, user_input, n
                          "Val F1": val_f1_str})
 
     df = df.append(new_row, ignore_index=True)
+    #df = pd.concat([df, pd.DataFrame([new_row])], ignore_index=True)
     df.to_excel(filename, index=False)
 
     print ("Results saved to: ", filename)

@@ -80,7 +80,6 @@ train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
 val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False)
 
 criterion = torch.nn.CrossEntropyLoss()
-
 optimizer = optim.Adam(combined_model.parameters(), lr=0.001)
 
 # Set the device
@@ -89,7 +88,7 @@ device = 'cuda:0' if torch.cuda.is_available() else 'cpu'
 # Training loop
 num_epochs = 10
 
-excel_filename = 'results.xlsx'
+excel_filename = 'logs/results.xlsx'
 
 train_losses, val_losses = train_model(user_input, train_loader, val_loader, combined_model, criterion, optimizer, device, num_epochs, excel_filename)
 

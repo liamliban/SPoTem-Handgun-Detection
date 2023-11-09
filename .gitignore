@@ -12,3 +12,4 @@ download_weights.sh
 yolo/weights/
 yolo/data/
 raw_dataset/dataset/
+logs/
