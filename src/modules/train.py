@@ -233,6 +233,11 @@ def write_results_to_excel(filename, run_number, current_datetime, user_input, n
                          "Test F1": test_f1_str})
 
     df = df.append(new_row, ignore_index=True)
+    
+    # Create logs folder if missing
+    if not os.path.exists('logs/'):
+        os.makedirs("logs/")
+
     df.to_excel(filename, index=False)
 
     print("Results saved to: ", filename)
