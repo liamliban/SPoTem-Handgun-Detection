@@ -97,7 +97,7 @@ print(f'''
     Epochs        : {num_epochs}
 ''')
 
-train_losses, val_losses, test_losses = train_model(user_input, train_loader, val_loader, combined_model, criterion, optimizer, device, num_epochs, excel_filename)
+train_losses, val_losses = train_model(user_input, train_loader, val_loader, combined_model, criterion, optimizer, device, num_epochs, excel_filename)
 
 # Add the visualization code here
 plt.plot(train_losses, label='Training Loss')
