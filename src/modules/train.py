@@ -113,11 +113,10 @@ def train_model(user_input, train_loader, val_loader, combined_model, criterion,
 
         combined_model.train()  # Set the model back to training mode
 
-        output =  "Epoch [{}/{}], Training Accuracy: {:.2f}%, Training Loss: {:.4f}, Validation Accuracy: {:.2f}%, Validation Loss: {:.4f}, Time: {:.2f} seconds".format(epoch + 1, num_epochs, train_accuracy, average_train_loss, val_accuracy, average_val_loss, epoch_time)
-        output += "Training Precision: {:.4f}, Training Recall: {:.4f}, Training F1 Score: {:.4f}".format(train_precision, train_recall, train_f1_score)
-        output += "Validation Precision: {:.4f}, Validation Recall: {:.4f}, Validation F1 Score: {:.4f}".format(val_precision, val_recall, val_f1_score)
+        output =  "Epoch [{}/{}], Training Accuracy: {:.2f}%, Training Loss: {:.4f}, Validation Accuracy: {:.2f}%, Validation Loss: {:.4f}, Time: {:.2f} seconds\n".format(epoch + 1, num_epochs, train_accuracy, average_train_loss, val_accuracy, average_val_loss, epoch_time)
+        output += "Training Precision: {:.4f}, Training Recall: {:.4f}, Training F1 Score: {:.4f}\n".format(train_precision, train_recall, train_f1_score)
+        output += "Validation Precision: {:.4f}, Validation Recall: {:.4f}, Validation F1 Score: {:.4f}\n".format(val_precision, val_recall, val_f1_score)
         print(output)
-        print()
 
         outputs.append(output) # collect outputs
 
@@ -143,13 +142,13 @@ def train_model(user_input, train_loader, val_loader, combined_model, criterion,
 
     # Save per Epoch data
     with open(f'logs\Run#{run_number}_OutputLog.txt', 'w') as file:
-        file.write(f'Train Set Size: {len(train_loader.dataset)}')
-        file.write(f'Val Set Size  : {len(val_loader.dataset)}')
-        file.write(f'Batch Size    : {train_loader.batch_size}')
-        file.write(f'Criterion     : {criterion.__class__.__name__}')
-        file.write(f'Optimizer     : {optimizer.__class__.__name__}')
-        file.write(f'Learning Rate : {optimizer.param_groups[0]["lr"]}')
-        file.write(f'Epochs        : {num_epochs}')
+        file.write(f'Train Set Size: {len(train_loader.dataset)}\n')
+        file.write(f'Val Set Size  : {len(val_loader.dataset)}\n')
+        file.write(f'Batch Size    : {train_loader.batch_size}\n')
+        file.write(f'Criterion     : {criterion.__class__.__name__}\n')
+        file.write(f'Optimizer     : {optimizer.__class__.__name__}\n')
+        file.write(f'Learning Rate : {optimizer.param_groups[0]["lr"]}\n')
+        file.write(f'Epochs        : {num_epochs}\n\n')
         for output in outputs:
             file.write(output)
 
