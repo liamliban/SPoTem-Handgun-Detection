@@ -47,6 +47,8 @@ def train_model(user_input, train_loader, val_loader, combined_model, criterion,
                 combined_output = combined_model(gun_data, pose_data, motion_data)
             elif user_input == '2':
                 combined_output = combined_model(gun_data, pose_data)  # New line for CombinedWithNoMotion
+            elif user_input == '3':
+                combined_output = combined_model(gun_data, pose_data)  # for New motion version
 
             _, predicted = torch.max(combined_output, 1)  # Get the class with the highest probability
             total += target_labels.size(0)  # Accumulate the total number of examples
@@ -90,6 +92,9 @@ def train_model(user_input, train_loader, val_loader, combined_model, criterion,
                     combined_output = combined_model(gun_data, pose_data, motion_data)
                 if user_input == '2':
                     combined_output = combined_model(gun_data, pose_data)
+                elif user_input == '3':
+                    combined_output = combined_model(gun_data, pose_data)  # for New motion version
+                
                 _, predicted = torch.max(combined_output, 1)  # Get the class with the highest probability
                 total += target_labels.size(0)  # Accumulate the total number of examples
                 correct += (predicted == target_labels).sum().item()  # Count correct predictions
@@ -165,6 +170,8 @@ def write_results_to_excel(filename, run_number, current_datetime, user_input, n
         model = 'GPM'
     elif user_input == '2':
         model = 'GP'
+    elif user_input == '3':
+        model = 'GPM2'
 
     # Format the accuracy with 2 decimal points and others with at most 4 decimal points
     train_accuracy_str = "{:.2f}%".format(train_accuracy)

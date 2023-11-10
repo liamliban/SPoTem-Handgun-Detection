@@ -3,10 +3,11 @@ from src.modules import motion_analysis
 from yolo.pytorchyolo import models
 import torchvision.transforms as transforms
 from src.modules.posecnn import poseCNN
-from src.modules.gun_yolo import CustomYolo, CustomDarknet53
-from src.modules.combined_model import CombinedModel
+from src.modules.gun_yolo import CustomYolo, CustomDarknet53, GunLSTM
+from src.modules.combined_model import CombinedModel, CombinedModelNewVer
 from src.modules.combined_model_no_motion import CombinedModelNoMotion
 from src.modules.custom_dataset import CustomGunDataset
+from src.modules.custom_dataset_gunLSTM import CustomGunLSTMDataset
 from src.modules.train import train_model
 from torch.utils.data import DataLoader
 import torch.optim as optim
@@ -18,7 +19,47 @@ from holocron.models import darknet53
 device = 'cuda:0' if torch.cuda.is_available() else 'cpu'
 print("Device: " , device)
 
-custom_dataset = CustomGunDataset(root_dir='data')
+
+# Load the models
+darknet_model = darknet53(pretrained=True)
+
+pose_model = poseCNN()
+
+motion_model = motion_analysis.MotionLSTM()
+
+
+user_input =  0
+while True:
+    user_input = input("Do you want to train all three models (1), without motion (2), or the new motion model (3)? Enter '1', '2', or '3': ").strip().upper()
+    if user_input == '1':
+        gun_model = CustomDarknet53(darknet_model)
+        combined_feature_size = 20 + 20 + 20 #total num of features of 3 model outputs
+        combined_model = CombinedModel(gun_model, pose_model, motion_model, combined_feature_size)
+        break
+    elif user_input == '2':
+        gun_model = CustomDarknet53(darknet_model)
+        combined_feature_size = 20 + 20 #total num of features of 3 model outputs
+        combined_model = CombinedModelNoMotion(gun_model, pose_model, combined_feature_size)
+        break
+    elif user_input == '3':
+        gun_model = GunLSTM(darknet_model)
+        combined_feature_size = 20 + 20 #total num of features of 3 model outputs
+        combined_model = CombinedModelNewVer(gun_model, pose_model, combined_feature_size)
+        break
+    else:
+        print("Invalid input. Please enter '1' for all three models or '2' for combined model with no motion or '3' for new motion model.")
+
+
+combined_model.to(device)
+combined_model.eval()
+
+window_size = 3
+
+if user_input == '3': 
+    # DATASET FOR NEW MODEL
+    custom_dataset = CustomGunLSTMDataset(root_dir='data', window_size = window_size)
+else:    
+    custom_dataset = CustomGunDataset(root_dir='data', window_size = window_size)
 
 print ("Number of samples in dataset: ", len(custom_dataset))
 
@@ -35,36 +76,7 @@ for idx, data_entry in enumerate(custom_dataset.data):
 print ("Number of label 0: ", label_0)
 print ("Number of label 1: ", label_1)
 
-# call the models
-# yolo_model = models.load_model("yolo/config/yolov3.cfg", "yolo/weights/yolov3.weights")
-# gun_model = CustomYolo(yolo_model)
-darknet_model = darknet53(pretrained=True)
-gun_model = CustomDarknet53(darknet_model)
 
-pose_model = poseCNN()
-
-motion_model = motion_analysis.MotionLSTM()
-
-# combined model
-#combined_feature_size = 20 + 20 + 20 #total num of features of 3 model outputs
-#combined_model = CombinedModel(gun_model, pose_model, motion_model, combined_feature_size)
-user_input =  0
-while True:
-    user_input = input("Do you want to train all three models (1) or without motion (2)? Enter '1' or '2': ").strip().upper()
-    if user_input == '1':
-        combined_feature_size = 20 + 20 + 20 #total num of features of 3 model outputs
-        combined_model = CombinedModel(gun_model, pose_model, motion_model, combined_feature_size)
-        break
-    elif user_input == '2':
-        combined_feature_size = 20 + 20 #total num of features of 3 model outputs
-        combined_model = CombinedModelNoMotion(gun_model, pose_model, combined_feature_size)
-        break
-    else:
-        print("Invalid input. Please enter '1' for all three models or '2' for combined model with no motion.")
-
-
-combined_model.to(device)
-combined_model.eval()
 
 
 # Split the dataset into training and validation sets
@@ -82,7 +94,7 @@ optimizer = optim.Adam(combined_model.parameters(), lr=0.001)
 device = 'cuda:0' if torch.cuda.is_available() else 'cpu'
 
 # Training loop
-num_epochs = 1
+num_epochs = 10
 
 excel_filename = 'logs/results.xlsx'
 

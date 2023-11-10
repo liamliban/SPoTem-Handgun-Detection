@@ -92,6 +92,8 @@ class CustomGunLSTMDataset(Dataset):
                                 # input_image = input_image.unsqueeze(0)
                                 pose_data = input_image
 
+                            # only used to remove samples the same way as the original customdataset
+                            old_modtion_data = motion_analysis.get_one_sequence(motion_path, frame_num, self.window_size)
 
                             # LABEL
                             # Read the CSV file
@@ -121,13 +123,15 @@ class CustomGunLSTMDataset(Dataset):
                             
                             gun_data_exist = gun_data is not None
                             pose_data_exist = pose_data is not None
+                            old_modtion_data_exist = old_modtion_data is not None
 
                                 
-                            if gun_data_exist and pose_data_exist:
+                            if gun_data_exist and pose_data_exist and old_modtion_data_exist:
                                 data_entry = {
                                     "data_name": sample_name,
                                     "gun_data": gun_data,
                                     "pose_data": pose_data,
+                                    "motion_data": old_modtion_data,
                                     "label": data_label
                                 }
                                 self.data.append(data_entry)
@@ -145,12 +149,13 @@ class CustomGunLSTMDataset(Dataset):
         data_name = self.data[index].get("data_name")
         gun_data = self.data[index].get("gun_data")
         pose_data = self.data[index].get("pose_data")
+        motion_data = self.data[index].get("motion_data")
         label = self.data[index].get("label")
 
         label = int(label)
         label = torch.tensor(label, dtype=torch.long)
 
-        return data_name, gun_data, pose_data, label
+        return data_name, gun_data, pose_data, motion_data, label
 
 def _list_subfolders(main_folder_path):
     subfolders = []
