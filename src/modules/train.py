@@ -7,7 +7,7 @@ import pandas as pd
 import os
 from datetime import datetime
 
-def train_model(user_input, train_loader, val_loader, combined_model, criterion, optimizer, device, num_epochs, excel_filename):
+def train_model(user_input, train_loader, val_loader, combined_model, criterion, optimizer, device, num_epochs, excel_filename, save=False):
     train_losses = []  # To store training losses for each epoch
     val_losses = []    # To store validation losses for each epoch
     outputs = []       # To store per epoch data
@@ -18,8 +18,6 @@ def train_model(user_input, train_loader, val_loader, combined_model, criterion,
     if os.path.exists(excel_filename):
         existing_df = pd.read_excel(excel_filename)
         run_number = len(existing_df) + 1
-    
-    willSave = input("Do you want to save the model? [y/n]: ").strip().lower() == 'y'
 
     print("")
     print("Training Started: ")
@@ -126,7 +124,7 @@ def train_model(user_input, train_loader, val_loader, combined_model, criterion,
         outputs.append(output) # collect outputs
 
         # Save Model
-        if willSave:
+        if save:
             model_checkpoint = {
                 'epoch': epoch,
                 'model_state_dict': combined_model.state_dict(),
