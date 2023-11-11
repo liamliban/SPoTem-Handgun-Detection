@@ -150,7 +150,7 @@ def train_model(user_input, train_loader, val_loader, combined_model, criterion,
         file.write(f'Learning Rate : {optimizer.param_groups[0]["lr"]}\n')
         file.write(f'Epochs        : {num_epochs}\n\n')
         for output in outputs:
-            file.write(output)
+            file.write(output + '\n')
 
     return train_losses, val_losses
 
