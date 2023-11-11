@@ -10,7 +10,7 @@ from datetime import datetime
 def train_model(user_input, train_loader, val_loader, combined_model, criterion, optimizer, device, num_epochs, excel_filename):
     train_losses = []  # To store training losses for each epoch
     val_losses = []    # To store validation losses for each epoch
-    outputs = []       # To store per epoch data
+
     # Get the current date and time
     current_datetime = datetime.now().strftime('%Y-%m-d %H:%M:%S')
     # Get the run number based on the existing Excel file
@@ -34,21 +34,15 @@ def train_model(user_input, train_loader, val_loader, combined_model, criterion,
         train_targets = []
 
         for batch in train_loader:
-            data_name, gun_data, pose_data, motion_data, target_labels = batch
+            data_name, gun_data, pose_data, target_labels = batch
 
             gun_data = gun_data.to(device)
             pose_data = pose_data.to(device)
-            motion_data = motion_data.to(device)
             target_labels = target_labels.to(device)
 
             optimizer.zero_grad()
 
-            if user_input == '1':
-                combined_output = combined_model(gun_data, pose_data, motion_data)
-            elif user_input == '2':
-                combined_output = combined_model(gun_data, pose_data)  # New line for CombinedWithNoMotion
-            elif user_input == '3':
-                combined_output = combined_model(gun_data, pose_data)  # for New motion version
+            combined_output = combined_model(gun_data, pose_data)  # New line for CombinedWithNoMotion
 
             _, predicted = torch.max(combined_output, 1)  # Get the class with the highest probability
             total += target_labels.size(0)  # Accumulate the total number of examples
@@ -81,19 +75,13 @@ def train_model(user_input, train_loader, val_loader, combined_model, criterion,
 
         with torch.no_grad():
             for batch in val_loader:
-                data_name, gun_data, pose_data, motion_data, target_labels = batch
+                data_name, gun_data, pose_data, target_labels = batch
 
                 gun_data = gun_data.to(device)
                 pose_data = pose_data.to(device)
-                motion_data = motion_data.to(device)
                 target_labels = target_labels.to(device)
                 
-                if user_input == '1':
-                    combined_output = combined_model(gun_data, pose_data, motion_data)
-                if user_input == '2':
-                    combined_output = combined_model(gun_data, pose_data)
-                elif user_input == '3':
-                    combined_output = combined_model(gun_data, pose_data)  # for New motion version
+                combined_output = combined_model(gun_data, pose_data)
                 
                 _, predicted = torch.max(combined_output, 1)  # Get the class with the highest probability
                 total += target_labels.size(0)  # Accumulate the total number of examples
@@ -118,12 +106,10 @@ def train_model(user_input, train_loader, val_loader, combined_model, criterion,
 
         combined_model.train()  # Set the model back to training mode
 
-        output =  "Epoch [{}/{}], Training Accuracy: {:.2f}%, Training Loss: {:.4f}, Validation Accuracy: {:.2f}%, Validation Loss: {:.4f}, Time: {:.2f} seconds\n".format(epoch + 1, num_epochs, train_accuracy, average_train_loss, val_accuracy, average_val_loss, epoch_time)
-        output += "Training Precision: {:.4f}, Training Recall: {:.4f}, Training F1 Score: {:.4f}\n".format(train_precision, train_recall, train_f1_score)
-        output += "Validation Precision: {:.4f}, Validation Recall: {:.4f}, Validation F1 Score: {:.4f}\n".format(val_precision, val_recall, val_f1_score)
-        print(output)
-
-        outputs.append(output) # collect outputs
+        print("Epoch [{}/{}], Training Accuracy: {:.2f}%, Training Loss: {:.4f}, Validation Accuracy: {:.2f}%, Validation Loss: {:.4f}, Time: {:.2f} seconds".format(epoch + 1, num_epochs, train_accuracy, average_train_loss, val_accuracy, average_val_loss, epoch_time))
+        print("Training Precision: {:.4f}, Training Recall: {:.4f}, Training F1 Score: {:.4f}".format(train_precision, train_recall, train_f1_score))
+        print("Validation Precision: {:.4f}, Validation Recall: {:.4f}, Validation F1 Score: {:.4f}".format(val_precision, val_recall, val_f1_score))
+        print()
 
         # Save Model
         if willSave:
@@ -145,18 +131,6 @@ def train_model(user_input, train_loader, val_loader, combined_model, criterion,
     # Save the results to Excel with run number and date
     write_results_to_excel(excel_filename, run_number, current_datetime, user_input, num_epochs, train_accuracy, train_precision, train_recall, train_f1_score, val_accuracy, val_precision, val_recall, val_f1_score, train_losses, val_losses)
 
-    # Save per Epoch data
-    with open(f'logs\Run#{run_number}_OutputLog.txt', 'w') as file:
-        file.write(f'Train Set Size: {len(train_loader.dataset)}\n')
-        file.write(f'Val Set Size  : {len(val_loader.dataset)}\n')
-        file.write(f'Batch Size    : {train_loader.batch_size}\n')
-        file.write(f'Criterion     : {criterion.__class__.__name__}\n')
-        file.write(f'Optimizer     : {optimizer.__class__.__name__}\n')
-        file.write(f'Learning Rate : {optimizer.param_groups[0]["lr"]}\n')
-        file.write(f'Epochs        : {num_epochs}\n\n')
-        for output in outputs:
-            file.write(output + '\n')
-
     return train_losses, val_losses
 
 # Function to write the results to Excel
@@ -170,8 +144,6 @@ def write_results_to_excel(filename, run_number, current_datetime, user_input, n
         model = 'GPM'
     elif user_input == '2':
         model = 'GP'
-    elif user_input == '3':
-        model = 'GPM2'
 
     # Format the accuracy with 2 decimal points and others with at most 4 decimal points
     train_accuracy_str = "{:.2f}%".format(train_accuracy)
