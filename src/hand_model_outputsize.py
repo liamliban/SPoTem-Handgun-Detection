@@ -7,10 +7,12 @@ import numpy as np
 import random
 
 # Set a random seed for reproducibility
-seed = 42
-torch.manual_seed(seed)
-np.random.seed(seed)
-random.seed(seed)
+torch.manual_seed(12)
+torch.cuda.manual_seed(12)
+np.random.seed(12)
+random.seed(12)
+
+torch.backends.cudnn.deterministic=True
 
 model = handpose_model()
 
