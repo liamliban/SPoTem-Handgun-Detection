@@ -1,8 +1,14 @@
 import torch
 from collections import OrderedDict
-
-import torch
 import torch.nn as nn
+import numpy as np
+import random
+
+# Set a random seed for reproducibility
+seed = 42
+torch.manual_seed(seed)
+np.random.seed(seed)
+random.seed(seed)
 
 def make_layers(block, no_relu_layers):
     layers = []

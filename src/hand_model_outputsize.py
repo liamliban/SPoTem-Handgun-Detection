@@ -3,6 +3,14 @@ from tqdm import tqdm
 import json
 
 from src.model import handpose_model
+import numpy as np
+import random
+
+# Set a random seed for reproducibility
+seed = 42
+torch.manual_seed(seed)
+np.random.seed(seed)
+random.seed(seed)
 
 model = handpose_model()
 

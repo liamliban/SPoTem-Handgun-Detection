@@ -1,6 +1,15 @@
 import csv
 import os
 import xml.etree.ElementTree as ET
+import torch
+import numpy as np
+import random
+
+# Set a random seed for reproducibility
+seed = 42
+torch.manual_seed(seed)
+np.random.seed(seed)
+random.seed(seed)
 
 # return true if at least one of the hand regions have gun
 # gun box is the annotation from the dataset

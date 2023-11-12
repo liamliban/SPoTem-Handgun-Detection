@@ -7,6 +7,14 @@ from matplotlib.figure import Figure
 import numpy as np
 import matplotlib.pyplot as plt
 import cv2
+import torch
+import random
+
+# Set a random seed for reproducibility
+seed = 42
+torch.manual_seed(seed)
+np.random.seed(seed)
+random.seed(seed)
 
 
 def padRightDownCorner(img, stride, padValue):

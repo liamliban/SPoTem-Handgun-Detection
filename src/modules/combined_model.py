@@ -3,6 +3,10 @@ import torch.nn as nn
 from yolo.pytorchyolo import models
 from src import model
 
+# Set a seed for PyTorch
+torch.manual_seed(42)
+
+
 class CombinedModel(nn.Module):
     def __init__(self, gun_model, pose_model, motion_model, combined_feature_size):
         super(CombinedModel, self).__init__()

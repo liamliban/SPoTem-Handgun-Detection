@@ -2,6 +2,15 @@ from PIL import Image, ImageDraw
 import math
 import os
 import copy
+import torch
+import numpy as np
+import random
+
+# Set a random seed for reproducibility
+seed = 42
+torch.manual_seed(seed)
+np.random.seed(seed)
+random.seed(seed)
 
 
 class BinaryPose:

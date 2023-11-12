@@ -4,6 +4,14 @@ import shutil
 import re
 import src.modules.data_creator as data_creator
 from src.modules import annotator
+import numpy as np
+import random
+
+# Set a random seed for reproducibility
+seed = 42
+torch.manual_seed(seed)
+np.random.seed(seed)
+random.seed(seed)
 
 def create_annotate_all_videos(dataset_folder, data_folder):
     video_names_list = _list_subfolders(dataset_folder)

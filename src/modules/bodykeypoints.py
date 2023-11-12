@@ -1,5 +1,14 @@
 import cv2
 from src.modules import handregion
+import torch
+import numpy as np
+import random
+
+# Set a random seed for reproducibility
+seed = 42
+torch.manual_seed(seed)
+np.random.seed(seed)
+random.seed(seed)
 
 # return keypoints dictionary (person_id,keypoints) for one person and plot keypoints
 def extract_keypoints(person_id, candidate, subset, confidence_min=0):

@@ -1,6 +1,13 @@
 import numpy as np
 import torch
 import torch.nn as nn
+import random
+
+# Set a random seed for reproducibility
+seed = 42
+torch.manual_seed(seed)
+np.random.seed(seed)
+random.seed(seed)
 
 # load the and shift data into a numpy array based on window_size, returns list of sequence of data
 def load_data(file_path, window_size):

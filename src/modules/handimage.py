@@ -1,7 +1,14 @@
 import cv2
 import numpy as np
 import os
+import torch
+import random
 
+# Set a random seed for reproducibility
+seed = 42
+torch.manual_seed(seed)
+np.random.seed(seed)
+random.seed(seed)
 # Return concatenated image of hand regions
 # size: 2 x 1 
 def create_hand_image(image, hand_regions, frame_image_shape, output_image_width, frame_number, folder_path):

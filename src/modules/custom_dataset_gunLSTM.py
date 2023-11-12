@@ -8,6 +8,13 @@ import pandas as pd
 import csv
 from src.modules import data_creator, motion_analysis
 import cv2
+import random
+
+# Set a random seed for reproducibility
+seed = 42
+torch.manual_seed(seed)
+np.random.seed(seed)
+random.seed(seed)
 
 class CustomGunLSTMDataset(Dataset):
     

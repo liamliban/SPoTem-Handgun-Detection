@@ -1,6 +1,14 @@
 import torch
 import torch.nn as nn
 from src import model
+import random
+import numpy as np
+
+# Set a random seed for reproducibility
+seed = 42
+torch.manual_seed(seed)
+np.random.seed(seed)
+random.seed(seed)
 
 class CombinedModelNoMotion(nn.Module):
     def __init__(self, gun_model, pose_model, combined_feature_size):

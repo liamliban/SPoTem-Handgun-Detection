@@ -10,6 +10,16 @@ from src import util
 from src.modules import handregion, bodykeypoints, handimage, motion_preprocess
 from src.modules.binarypose import BinaryPose
 
+import torch
+import numpy as np
+import random
+
+# Set a random seed for reproducibility
+seed = 42
+torch.manual_seed(seed)
+np.random.seed(seed)
+random.seed(seed)
+
 # total number of person in video
 total_num_person = 0
 

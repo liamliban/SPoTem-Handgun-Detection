@@ -10,6 +10,13 @@ from torchvision import transforms
 
 from src import util
 from src.model import bodypose_model
+import random
+
+# Set a random seed for reproducibility
+seed = 42
+torch.manual_seed(seed)
+np.random.seed(seed)
+random.seed(seed)
 
 class Body(object):
     def __init__(self, model_path):

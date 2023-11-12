@@ -1,5 +1,14 @@
 import os
 import cv2
+import torch
+import numpy as np
+import random
+
+# Set a random seed for reproducibility
+seed = 42
+torch.manual_seed(seed)
+np.random.seed(seed)
+random.seed(seed)
 
 # Main function
 # return:
