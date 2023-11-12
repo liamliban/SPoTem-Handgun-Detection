@@ -38,11 +38,15 @@ def get_one_sequence(file_path, frame_num, window_size):
         if len(lines) <= frame_num:
             raise ("frame num is not in the text file!")
 
-        if window_size > len(lines):
-            return None
+        # if window_size > len(lines):
+        #     return None
         sequence = []
         for i in range(frame_num - (window_size - 1), frame_num + 1):
-            line = lines[i].strip().split(',')
+            if i < 0:
+                string = '999,999,999,999,999,999,999,999,999,999,999,999,999,999,999,999,999,999,999,999,999,999,999,999,999,999,999,999,999,999,999,999,999,999,999,999'
+                line = string.strip().split(',')
+            else:
+                line = lines[i].strip().split(',')
             sequence.append([float(val) for val in line])
         # data.append(sequence)
         data=sequence
