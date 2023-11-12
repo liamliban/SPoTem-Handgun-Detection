@@ -126,7 +126,7 @@ class CustomGunLSTMDataset(Dataset):
                             old_modtion_data_exist = old_modtion_data is not None
 
                                 
-                            if gun_data_exist and pose_data_exist and old_modtion_data_exist:
+                            if gun_data_exist and pose_data_exist:
                                 data_entry = {
                                     "data_name": sample_name,
                                     "gun_data": gun_data,
