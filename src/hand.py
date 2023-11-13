@@ -11,7 +11,7 @@ from skimage.measure import label
 
 from src.model import handpose_model
 from src import util
-
+import os
 import random
 
 # Set a random seed for reproducibility
@@ -19,6 +19,10 @@ torch.manual_seed(12)
 torch.cuda.manual_seed(12)
 np.random.seed(12)
 random.seed(12)
+os.environ['PYTHONHASHSEED'] = str(12)
+torch.cuda.manual_seed_all(12)
+torch.backends.cudnn.benchmark = False
+torch.backends.cudnn.enabled = False
 
 torch.backends.cudnn.deterministic=True
 

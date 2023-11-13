@@ -1,4 +1,5 @@
 import torch
+import os
 from src.modules import motion_analysis
 from yolo.pytorchyolo import models
 import torchvision.transforms as transforms
@@ -23,6 +24,10 @@ torch.manual_seed(12)
 torch.cuda.manual_seed(12)
 np.random.seed(12)
 random.seed(12)
+os.environ['PYTHONHASHSEED'] = str(12)
+torch.cuda.manual_seed_all(12)
+torch.backends.cudnn.benchmark = False
+torch.backends.cudnn.enabled = False
 
 torch.backends.cudnn.deterministic=True
 
@@ -63,7 +68,7 @@ while True:
 combined_model.to(device)
 combined_model.eval()
 
-window_size = 3
+window_size = 5
 
 if user_input == '3': 
     # DATASET FOR NEW MODEL
@@ -102,7 +107,7 @@ optimizer = optim.Adam(combined_model.parameters(), lr=0.001)
 device = 'cuda:0' if torch.cuda.is_available() else 'cpu'
 
 # Training loop
-num_epochs = 2
+num_epochs = 60
 
 excel_filename = 'logs/results.xlsx'
 
