@@ -8,6 +8,7 @@ import os
 from datetime import datetime
 import numpy as np
 import random
+import matplotlib.pyplot as plt
 
 # Set a random seed for reproducibility
 torch.manual_seed(12)
@@ -17,17 +18,28 @@ random.seed(12)
 
 torch.backends.cudnn.deterministic=True
 
-def train_model(user_input, train_loader, val_loader, combined_model, criterion, optimizer, device, num_epochs, excel_filename, save=False):
+def train_model(user_input, train_loader, val_loader, combined_model, criterion, optimizer, device, num_epochs, excel_filename, save=False, window_size=None):
     train_losses = []  # To store training losses for each epoch
     val_losses = []    # To store validation losses for each epoch
     outputs = []       # To store per epoch data
+
     # Get the current date and time
     current_datetime = datetime.now().strftime('%Y-%m-d %H:%M:%S')
+
+    # Get model type
+    model_type = 'GPM' if user_input == '1' else 'GP' if user_input == '2' else 'GPM2'
+
     # Get the run number based on the existing Excel file
     run_number = 1
     if os.path.exists(excel_filename):
         existing_df = pd.read_excel(excel_filename)
         run_number = len(existing_df) + 1
+
+    log_folder = f'logs/run#{run_number}/'
+
+    # Create The Logs Folder
+    if not os.path.exists(log_folder): 
+        os.makedirs(log_folder)
 
     print("")
     print("Training Started: ")
@@ -141,8 +153,7 @@ def train_model(user_input, train_loader, val_loader, combined_model, criterion,
                 'optimizer_state_dict': optimizer.state_dict(),
                 'loss': loss,
             }
-            model_type = 'GPM' if user_input == '1' else 'GP'
-            model_folder = f'logs/models/{model_type}/{run_number}/'
+            model_folder = f'{log_folder}model/'
             if not os.path.exists(model_folder):
                 os.makedirs(model_folder)
             model_path = f'{model_folder}model_epoch_{epoch}.pt'
@@ -154,7 +165,11 @@ def train_model(user_input, train_loader, val_loader, combined_model, criterion,
     write_results_to_excel(excel_filename, run_number, current_datetime, user_input, num_epochs, train_accuracy, train_precision, train_recall, train_f1_score, val_accuracy, val_precision, val_recall, val_f1_score, train_losses, val_losses)
 
     # Save per Epoch data
-    with open(f'logs\Run#{run_number}_OutputLog.txt', 'w') as file:
+    output_log_path = f'{log_folder}run#{run_number}_OutputLog.txt'
+    with open(output_log_path, 'w') as file:
+        file.write(f'Model Type    : {model_type}\n')
+        if window_size is not None:
+            file.write(f'Window Size   : {window_size}')
         file.write(f'Train Set Size: {len(train_loader.dataset)}\n')
         file.write(f'Val Set Size  : {len(val_loader.dataset)}\n')
         file.write(f'Batch Size    : {train_loader.batch_size}\n')
@@ -164,6 +179,23 @@ def train_model(user_input, train_loader, val_loader, combined_model, criterion,
         file.write(f'Epochs        : {num_epochs}\n\n')
         for output in outputs:
             file.write(output + '\n')
+
+        print(f'Output log saved to: {output_log_path}')
+
+    # Show and Save plot
+    figure_path = f'{log_folder}run#{run_number}_plot.png'
+
+    plt.plot(train_losses, label='Training Loss')
+    plt.plot(val_losses, label='Validation Loss')
+    plt.xlabel('Epoch')
+    plt.ylabel('Loss')
+    plt.legend()
+    plt.title(f'{model_type} Training and Validation Loss (WinSize = {window_size})')
+
+    plt.savefig(figure_path)
+    print(f'Figure saved to: {figure_path}')
+
+    plt.show()
 
     return train_losses, val_losses
 
