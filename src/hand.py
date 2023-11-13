@@ -12,6 +12,16 @@ from skimage.measure import label
 from src.model import handpose_model
 from src import util
 
+import random
+
+# Set a random seed for reproducibility
+torch.manual_seed(12)
+torch.cuda.manual_seed(12)
+np.random.seed(12)
+random.seed(12)
+
+torch.backends.cudnn.deterministic=True
+
 class Hand(object):
     def __init__(self, model_path):
         self.model = handpose_model()

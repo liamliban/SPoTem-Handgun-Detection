@@ -10,6 +10,15 @@ from torchvision import transforms
 
 from src import util
 from src.model import bodypose_model
+import random
+
+# Set a random seed for reproducibility
+torch.manual_seed(12)
+torch.cuda.manual_seed(12)
+np.random.seed(12)
+random.seed(12)
+
+torch.backends.cudnn.deterministic=True
 
 class Body(object):
     def __init__(self, model_path):

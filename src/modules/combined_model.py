@@ -2,6 +2,17 @@ import torch
 import torch.nn as nn
 from yolo.pytorchyolo import models
 from src import model
+import numpy as np
+import random
+
+# Set a seed for PyTorch
+torch.manual_seed(12)
+torch.cuda.manual_seed(12)
+np.random.seed(12)
+random.seed(12)
+
+torch.backends.cudnn.deterministic=True
+
 
 class CombinedModel(nn.Module):
     def __init__(self, gun_model, pose_model, motion_model, combined_feature_size):

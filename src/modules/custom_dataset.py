@@ -5,8 +5,18 @@ from torchvision import transforms
 import torchvision
 import pandas as pd
 import csv
+import numpy as np
 from src.modules import data_creator, motion_analysis
 import cv2
+import random
+
+# Set a random seed for reproducibility
+torch.manual_seed(12)
+torch.cuda.manual_seed(12)
+np.random.seed(12)
+random.seed(12)
+
+torch.backends.cudnn.deterministic=True
 
 class CustomGunDataset(Dataset):
     

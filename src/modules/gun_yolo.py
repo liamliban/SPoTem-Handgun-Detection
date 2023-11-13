@@ -6,6 +6,16 @@ from yolo.pytorchyolo import models
 import torchvision.transforms as transforms
 from torch.nn import MaxPool2d, functional as F
 from src.modules.utils import GlobalAvgPool2d, auto_pad
+import numpy as np
+import random
+
+# Set a random seed for reproducibility
+torch.manual_seed(12)
+torch.cuda.manual_seed(12)
+np.random.seed(12)
+random.seed(12)
+
+torch.backends.cudnn.deterministic=True
 
 # Define a forward hook to capture the activation of the conv_81 layer
 def get_activation(name, activation):

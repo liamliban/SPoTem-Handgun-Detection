@@ -15,6 +15,16 @@ from sklearn.model_selection import train_test_split
 import matplotlib.pyplot as plt
 import seaborn as sns
 from holocron.models import darknet53
+import numpy as np
+import random
+
+# Set a random seed for reproducibility
+torch.manual_seed(12)
+torch.cuda.manual_seed(12)
+np.random.seed(12)
+random.seed(12)
+
+torch.backends.cudnn.deterministic=True
 
 device = 'cuda:0' if torch.cuda.is_available() else 'cpu'
 print("Device: " , device)
@@ -77,8 +87,6 @@ print ("Number of label 0: ", label_0)
 print ("Number of label 1: ", label_1)
 
 
-
-
 # Split the dataset into training and validation sets
 train_dataset, val_dataset = train_test_split(custom_dataset, test_size=0.2, random_state=42)
 
@@ -94,12 +102,14 @@ optimizer = optim.Adam(combined_model.parameters(), lr=0.001)
 device = 'cuda:0' if torch.cuda.is_available() else 'cpu'
 
 # Training loop
-num_epochs = 10
+num_epochs = 2
 
 excel_filename = 'logs/results.xlsx'
 
 # Print Hyperparameters
 print(f'''
+    Model Type    : {'GPM' if user_input == '1' else 'GP' if user_input == '2' else 'GPM2'}
+    Window Size   : {window_size}
     Train Set Size: {len(train_dataset)}
     Val Set Size  : {len(val_dataset)}
     Batch Size    : {batch_size}
@@ -109,13 +119,4 @@ print(f'''
     Epochs        : {num_epochs}
 ''')
 
-train_losses, val_losses = train_model(user_input, train_loader, val_loader, combined_model, criterion, optimizer, device, num_epochs, excel_filename)
-
-# Add the visualization code here
-plt.plot(train_losses, label='Training Loss')
-plt.plot(val_losses, label='Validation Loss')
-plt.xlabel('Epoch')
-plt.ylabel('Loss')
-plt.legend()
-plt.show()
-
+train_losses, val_losses = train_model(user_input, train_loader, val_loader, combined_model, criterion, optimizer, device, num_epochs, excel_filename, window_size=window_size)

@@ -1,6 +1,15 @@
 import numpy as np
 import torch
 import torch.nn as nn
+import random
+
+# Set a random seed for reproducibility
+torch.manual_seed(12)
+torch.cuda.manual_seed(12)
+np.random.seed(12)
+random.seed(12)
+
+torch.backends.cudnn.deterministic=True
 
 # load the and shift data into a numpy array based on window_size, returns list of sequence of data
 def load_data(file_path, window_size):
@@ -29,11 +38,15 @@ def get_one_sequence(file_path, frame_num, window_size):
         if len(lines) <= frame_num:
             raise ("frame num is not in the text file!")
 
-        if window_size > len(lines):
-            return None
+        # if window_size > len(lines):
+        #     return None
         sequence = []
         for i in range(frame_num - (window_size - 1), frame_num + 1):
-            line = lines[i].strip().split(',')
+            if i < 0:
+                string = '999,999,999,999,999,999,999,999,999,999,999,999,999,999,999,999,999,999,999,999,999,999,999,999,999,999,999,999,999,999,999,999,999,999,999,999'
+                line = string.strip().split(',')
+            else:
+                line = lines[i].strip().split(',')
             sequence.append([float(val) for val in line])
         # data.append(sequence)
         data=sequence
