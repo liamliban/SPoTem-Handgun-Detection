@@ -21,6 +21,8 @@ torch.backends.cudnn.deterministic=True
 def train_model(user_input, train_loader, val_loader, combined_model, criterion, optimizer, device, num_epochs, excel_filename, save=False, window_size=None):
     train_losses = []  # To store training losses for each epoch
     val_losses = []    # To store validation losses for each epoch
+    train_accuracies = []
+    val_accuracies = []
     outputs = []       # To store per epoch data
 
     # Get the current date and time
@@ -90,6 +92,7 @@ def train_model(user_input, train_loader, val_loader, combined_model, criterion,
 
         average_train_loss = total_train_loss / len(train_loader)
         train_losses.append(average_train_loss)
+        train_accuracies.append(train_accuracy)
 
         # Validation loop
         combined_model.eval()  # Set the model to evaluation mode
@@ -135,6 +138,7 @@ def train_model(user_input, train_loader, val_loader, combined_model, criterion,
         
         average_val_loss = total_val_loss / len(val_loader)
         val_losses.append(average_val_loss)
+        val_accuracies.append(val_accuracy)
 
         combined_model.train()  # Set the model back to training mode
 
@@ -182,8 +186,8 @@ def train_model(user_input, train_loader, val_loader, combined_model, criterion,
 
         print(f'Output log saved to: {output_log_path}')
 
-    # Show and Save plot
-    figure_path = f'{log_folder}run#{run_number}_plot.png'
+    # Show and Save Loss Plot
+    loss_path = f'{log_folder}run#{run_number}_loss.png'
 
     plt.plot(train_losses, label='Training Loss')
     plt.plot(val_losses, label='Validation Loss')
@@ -191,11 +195,22 @@ def train_model(user_input, train_loader, val_loader, combined_model, criterion,
     plt.ylabel('Loss')
     plt.legend()
     plt.title(f'{model_type} Training and Validation Loss (WinSize = {window_size})')
+    plt.savefig(loss_path)
+    print(f'Loss Diagram Saved To: {loss_path}')
+    plt.close()
 
-    plt.savefig(figure_path)
-    print(f'Figure saved to: {figure_path}')
+    # Show and Save Accuracy Plot
+    acc_path = f'{log_folder}run#{run_number}_accuracy.png'
 
-    plt.show()
+    plt.plot(train_accuracies, label='Training Accuracy')
+    plt.plot(val_accuracies, label='Validation Accuracy')
+    plt.xlabel('Epoch')
+    plt.ylabel('Accuracy')
+    plt.legend()
+    plt.title(f'{model_type} Training and Validation Accuracy (WinSize = {window_size})')
+    plt.savefig(acc_path)
+    print(f'Accuracy Diagram Saved To: {acc_path}')
+    plt.close()
 
     return train_losses, val_losses
 
