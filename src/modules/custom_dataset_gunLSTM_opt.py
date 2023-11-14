@@ -8,6 +8,19 @@ import pandas as pd
 import csv
 from src.modules import data_creator, motion_analysis
 import cv2
+import random
+
+# Set a random seed for reproducibility
+torch.manual_seed(12)
+torch.cuda.manual_seed(12)
+np.random.seed(12)
+random.seed(12)
+os.environ['PYTHONHASHSEED'] = str(12)
+torch.cuda.manual_seed_all(12)
+torch.backends.cudnn.benchmark = False
+torch.backends.cudnn.enabled = False
+
+torch.backends.cudnn.deterministic=True
 
 class CustomGunLSTMDataset_opt(Dataset):
     
@@ -58,7 +71,7 @@ class CustomGunLSTMDataset_opt(Dataset):
                         
                         for frame_num in range(num_frames):
                             hand_path = os.path.join(hand_folder_path, 'hands_' + str(frame_num) + '.pt')
-                            black_hand_path = 'data/darknet_black_tensor.pt'
+                            black_hand_path = 'data/darknet_black_feature_tensor.pt'
                             pose_path = os.path.join(pose_folder_path, 'pose_' + str(frame_num) + '.png')
                             motion_path = os.path.join(motion_folder_path, "keypoints_seq.txt")
                             

@@ -75,6 +75,8 @@ def train_model(user_input, train_loader, val_loader, combined_model, criterion,
                 combined_output = combined_model(gun_data, pose_data)  # New line for CombinedWithNoMotion
             elif user_input == '3':
                 combined_output = combined_model(gun_data, pose_data)  # for New motion version
+            elif user_input == '4':
+                    combined_output = combined_model(gun_data, pose_data)  # for New motion version
 
             _, predicted = torch.max(combined_output, 1)  # Get the class with the highest probability
             total += target_labels.size(0)  # Accumulate the total number of examples
@@ -120,6 +122,8 @@ def train_model(user_input, train_loader, val_loader, combined_model, criterion,
                 if user_input == '2':
                     combined_output = combined_model(gun_data, pose_data)
                 elif user_input == '3':
+                    combined_output = combined_model(gun_data, pose_data)  # for New motion version
+                elif user_input == '4':
                     combined_output = combined_model(gun_data, pose_data)  # for New motion version
                 
                 _, predicted = torch.max(combined_output, 1)  # Get the class with the highest probability
