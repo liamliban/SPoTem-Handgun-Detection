@@ -1,11 +1,11 @@
 import os
-import numpy as np
 import torch
 from torch.utils.data import Dataset
 from torchvision import transforms
 import torchvision
 import pandas as pd
 import csv
+import numpy as np
 from src.modules import data_creator, motion_analysis
 import cv2
 import random
@@ -22,7 +22,7 @@ torch.backends.cudnn.enabled = False
 
 torch.backends.cudnn.deterministic=True
 
-class CustomGunLSTMDataset_opt(Dataset):
+class CustomGunDataset_opt(Dataset):
     
     def __init__(self, root_dir, window_size = 3, transform=None, video=None):
         self.data_dir = root_dir
@@ -71,7 +71,6 @@ class CustomGunLSTMDataset_opt(Dataset):
                         
                         for frame_num in range(num_frames):
                             hand_path = os.path.join(hand_folder_path, 'hands_' + str(frame_num) + '.pt')
-                            black_hand_path = 'data/darknet_black_feature_tensor.pt'
                             pose_path = os.path.join(pose_folder_path, 'pose_' + str(frame_num) + '.png')
                             motion_path = os.path.join(motion_folder_path, "keypoints_seq.txt")
                             
@@ -80,19 +79,9 @@ class CustomGunLSTMDataset_opt(Dataset):
                             gun_data = None
 
                             if hand_file_exist:
-                                hand_tensors = []
+                                hand_tensor = torch.load(hand_path)
 
-                                for i in range(self.window_size):
-                                    hand_path = os.path.join(hand_folder_path, 'hands_' + str(frame_num - i) + '.pt')
-                                    if os.path.isfile(hand_path):
-                                        hand_tensor = torch.load(hand_path)
-                                    else:
-                                        hand_tensor = torch.load(black_hand_path)
-                                    hand_tensors.append(hand_tensor)   
-                                
-                                hand_tensors.reverse()
-
-                                gun_data = torch.cat(hand_tensors, dim=0)
+                                gun_data = hand_tensor
                             
                             # POSE DATA
                             pose_file_exist = os.path.isfile(pose_path)
@@ -105,8 +94,10 @@ class CustomGunLSTMDataset_opt(Dataset):
                                 # input_image = input_image.unsqueeze(0)
                                 pose_data = input_image
 
-                            # only used to remove samples the same way as the original customdataset
-                            old_modtion_data = motion_analysis.get_one_sequence(motion_path, frame_num, self.window_size)
+
+                            # MOTION DATA
+
+                            motion_data = motion_analysis.get_one_sequence(motion_path, frame_num, self.window_size)
 
                             # LABEL
                             # Read the CSV file
@@ -136,15 +127,15 @@ class CustomGunLSTMDataset_opt(Dataset):
                             
                             gun_data_exist = gun_data is not None
                             pose_data_exist = pose_data is not None
-                            old_modtion_data_exist = old_modtion_data is not None
+                            motion_data_exist = motion_data is not None
 
                                 
-                            if gun_data_exist and pose_data_exist:
+                            if gun_data_exist and pose_data_exist and motion_data_exist:
                                 data_entry = {
                                     "data_name": sample_name,
                                     "gun_data": gun_data,
                                     "pose_data": pose_data,
-                                    "motion_data": old_modtion_data,
+                                    "motion_data": motion_data,
                                     "label": data_label
                                 }
                                 self.data.append(data_entry)
@@ -152,6 +143,7 @@ class CustomGunLSTMDataset_opt(Dataset):
                                 print(f"Skipping {sample_name}:")
                                 print("\tGun data exist: ", gun_data_exist)
                                 print("\tPose data exist: ", pose_data_exist)
+                                print("\tMotion data exist: ", motion_data_exist)
                                 continue  # Continue to the next image
 
     def __len__(self):
@@ -193,34 +185,5 @@ def _list_subfolders(main_folder_path):
     
     return sorted(subfolders, key=custom_sort_key)
 
-def get_hand_image(hand_path):
-    # Load the image as a numpy array
-    hand_image = cv2.imread(hand_path)
-    hand_image = cv2.cvtColor(hand_image, cv2.COLOR_BGR2RGB)
-
-    original_height, original_width = hand_image.shape[:2]
-
-    target_width = 416
-
-    # Calculate the scaling factor for the width to make it 416
-    scale_factor = target_width / original_width
-    scaled_image = cv2.resize(hand_image, (target_width, int(original_height * scale_factor)))
-
-    # Calculate the necessary padding for height
-    original_height, original_width = scaled_image.shape[:2]
-    target_height = 416
-
-    padding_height = max(target_height - original_height, 0)
-
-    # Calculate the top and bottom padding dimensions
-    top = padding_height // 2
-    bottom = padding_height - top
-
-    # Pad the image to achieve the final size of 416x416
-    padded_image = cv2.copyMakeBorder(scaled_image, top, bottom, 0, 0, cv2.BORDER_CONSTANT, value=(0, 0, 0))
 
 
-    # TEMPORARY: resize the image to 224
-    padded_image = cv2.resize(padded_image, (224,224))
-
-    return padded_image

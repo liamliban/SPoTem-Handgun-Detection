@@ -71,12 +71,8 @@ def train_model(user_input, train_loader, val_loader, combined_model, criterion,
 
             if user_input == '1':
                 combined_output = combined_model(gun_data, pose_data, motion_data)
-            elif user_input == '2':
-                combined_output = combined_model(gun_data, pose_data)  # New line for CombinedWithNoMotion
-            elif user_input == '3':
-                combined_output = combined_model(gun_data, pose_data)  # for New motion version
-            elif user_input == '4':
-                    combined_output = combined_model(gun_data, pose_data)  # for New motion version
+            else:
+                combined_output = combined_model(gun_data, pose_data)
 
             _, predicted = torch.max(combined_output, 1)  # Get the class with the highest probability
             total += target_labels.size(0)  # Accumulate the total number of examples
@@ -119,12 +115,8 @@ def train_model(user_input, train_loader, val_loader, combined_model, criterion,
                 
                 if user_input == '1':
                     combined_output = combined_model(gun_data, pose_data, motion_data)
-                if user_input == '2':
+                else:
                     combined_output = combined_model(gun_data, pose_data)
-                elif user_input == '3':
-                    combined_output = combined_model(gun_data, pose_data)  # for New motion version
-                elif user_input == '4':
-                    combined_output = combined_model(gun_data, pose_data)  # for New motion version
                 
                 _, predicted = torch.max(combined_output, 1)  # Get the class with the highest probability
                 total += target_labels.size(0)  # Accumulate the total number of examples
@@ -235,6 +227,10 @@ def write_results_to_excel(filename, run_number, current_datetime, user_input, n
         model = 'GP'
     elif user_input == '3':
         model = 'GPM2'
+    elif user_input == '4':
+        model = 'GPM2-opt'
+    elif user_input == '5':
+        model = 'GP-opt'
 
     # Format the accuracy with 2 decimal points and others with at most 4 decimal points
     train_accuracy_str = "{:.2f}%".format(train_accuracy)

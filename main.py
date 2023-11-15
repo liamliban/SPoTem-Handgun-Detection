@@ -4,12 +4,13 @@ from src.modules import motion_analysis
 from yolo.pytorchyolo import models
 import torchvision.transforms as transforms
 from src.modules.posecnn import poseCNN
-from src.modules.gun_yolo import CustomYolo, CustomDarknet53, GunLSTM, GunLSTM_Optimized
+from src.modules.gun_yolo import CustomDarknet53, GunLSTM, GunLSTM_Optimized, Gun_Optimized
 from src.modules.combined_model import CombinedModel, CombinedModelNewVer
 from src.modules.combined_model_no_motion import CombinedModelNoMotion
 from src.modules.custom_dataset import CustomGunDataset
 from src.modules.custom_dataset_gunLSTM import CustomGunLSTMDataset
 from src.modules.custom_dataset_gunLSTM_opt import CustomGunLSTMDataset_opt
+from src.modules.custom_dataset_opt import CustomGunDataset_opt
 from src.modules.train import train_model
 from torch.utils.data import DataLoader
 import torch.optim as optim
@@ -46,7 +47,7 @@ motion_model = motion_analysis.MotionLSTM()
 
 user_input =  0
 while True:
-    user_input = input("Do you want to train all three models (1), without motion (2), new motion model (3), optimized new motion model(4)? Enter '1', '2', '3', '4': ").strip().upper()
+    user_input = input("Do you want to train GPM (1), GP (2), GPM2 (3), GPM2-opt (4), GP-opt (5)? Enter '1', '2', '3', '4', '5': ").strip().upper()
     if user_input == '1':
         gun_model = CustomDarknet53(darknet_model)
         combined_feature_size = 20 + 20 + 20 #total num of features of 3 model outputs
@@ -67,6 +68,11 @@ while True:
         combined_feature_size = 20 + 20 #total num of features of 3 model outputs
         combined_model = CombinedModelNewVer(gun_model, pose_model, combined_feature_size)
         break
+    elif user_input == '5':
+        gun_model = Gun_Optimized()
+        combined_feature_size = 20 + 20 #total num of features of 3 model outputs
+        combined_model = CombinedModelNewVer(gun_model, pose_model, combined_feature_size)
+        break
     else:
         print("Invalid input. Please enter '1' for all three models or '2' for combined model with no motion or '3' for new motion model.")
 
@@ -82,10 +88,19 @@ if user_input == '3':
 elif user_input == '4': 
     # DATASET FOR NEW MODEL optimized
     custom_dataset = CustomGunLSTMDataset_opt(root_dir='data', window_size = window_size)
+elif user_input == '5': 
+    # DATASET FOR old model optimized
+    custom_dataset = CustomGunDataset_opt(root_dir='data', window_size = window_size)
 else:    
     custom_dataset = CustomGunDataset(root_dir='data', window_size = window_size)
 
 print ("Number of samples in dataset: ", len(custom_dataset))
+
+# for idx, data_entry in enumerate(custom_dataset.data):
+#     print(f"Data Entry {idx + 1}:")
+#     print("Data Name:", data_entry["data_name"])
+#     print("Gun Data Shape:", data_entry["gun_data"].shape)
+#     print("Pose Data Shape:", data_entry["pose_data"].shape)
 
 label_0 = 0
 label_1 = 0
