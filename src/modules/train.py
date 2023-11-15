@@ -69,7 +69,7 @@ def train_model(user_input, train_loader, val_loader, combined_model, criterion,
 
             optimizer.zero_grad()
 
-            if user_input == '1':
+            if user_input == '1' or user_input == '6':
                 combined_output = combined_model(gun_data, pose_data, motion_data)
             else:
                 combined_output = combined_model(gun_data, pose_data)
@@ -113,7 +113,7 @@ def train_model(user_input, train_loader, val_loader, combined_model, criterion,
                 motion_data = motion_data.to(device)
                 target_labels = target_labels.to(device)
                 
-                if user_input == '1':
+                if user_input == '1' or user_input == '6':
                     combined_output = combined_model(gun_data, pose_data, motion_data)
                 else:
                     combined_output = combined_model(gun_data, pose_data)
@@ -231,6 +231,8 @@ def write_results_to_excel(filename, run_number, current_datetime, user_input, n
         model = 'GPM2-opt'
     elif user_input == '5':
         model = 'GP-opt'
+    elif user_input == '6':
+        model = 'GPM-opt'
 
     # Format the accuracy with 2 decimal points and others with at most 4 decimal points
     train_accuracy_str = "{:.2f}%".format(train_accuracy)
