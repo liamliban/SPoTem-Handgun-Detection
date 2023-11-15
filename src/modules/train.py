@@ -1,5 +1,6 @@
 import torch
 import torch.optim as optim
+import torch.nn as nn
 from torch.utils.data import DataLoader
 import time
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, confusion_matrix
@@ -32,8 +33,21 @@ def train_model(user_input, train_loader, val_loader, combined_model, criterion,
     # Get the current date and time
     current_datetime = datetime.now().strftime('%Y-%m-d %H:%M:%S')
 
-    # Get model type
-    model_type = 'GPM' if user_input == '1' else 'GP' if user_input == '2' else 'GPM2'
+    # Get model name
+    model_name = ''
+    if user_input == '1':
+        model_name = 'GPM'
+    elif user_input == '2':
+        model_name = 'GP'
+    elif user_input == '3':
+        model_name = 'GPM2'
+    elif user_input == '4':
+        model_name = 'GPM2-opt'
+    elif user_input == '5':
+        model_name = 'GP-opt'
+    elif user_input == '6':
+        model_name = 'GPM-opt'
+
 
     # Get the run number based on the existing Excel file
     run_number = 1
@@ -80,6 +94,9 @@ def train_model(user_input, train_loader, val_loader, combined_model, criterion,
 
             loss = criterion(combined_output, target_labels)
             loss.backward()
+
+            nn.utils.clip_grad_norm_(combined_model.parameters(), max_norm=2)
+
             optimizer.step()
 
             total_train_loss += loss.item()
@@ -163,15 +180,10 @@ def train_model(user_input, train_loader, val_loader, combined_model, criterion,
             model_path = f'{model_folder}model_epoch_{epoch}.pt'
             torch.save(model_checkpoint, model_path)
 
-    
-
-    # Save the results to Excel with run number and date
-    write_results_to_excel(excel_filename, run_number, current_datetime, user_input, num_epochs, train_accuracy, train_precision, train_recall, train_f1_score, val_accuracy, val_precision, val_recall, val_f1_score, train_losses, val_losses)
-
     # Save per Epoch data
     output_log_path = f'{log_folder}run#{run_number}_OutputLog.txt'
     with open(output_log_path, 'w') as file:
-        file.write(f'Model Type    : {model_type}\n')
+        file.write(f'Model Type    : {model_name}\n')
         if window_size is not None:
             file.write(f'Window Size   : {window_size}')
         file.write(f'Train Set Size: {len(train_loader.dataset)}\n')
@@ -194,7 +206,7 @@ def train_model(user_input, train_loader, val_loader, combined_model, criterion,
     plt.xlabel('Epoch')
     plt.ylabel('Loss')
     plt.legend()
-    plt.title(f'{model_type} Training and Validation Loss (WinSize = {window_size})')
+    plt.title(f'{model_name} Training and Validation Loss (WinSize = {window_size})')
     plt.savefig(loss_path)
     print(f'Loss Diagram Saved To: {loss_path}')
     plt.close()
@@ -207,10 +219,13 @@ def train_model(user_input, train_loader, val_loader, combined_model, criterion,
     plt.xlabel('Epoch')
     plt.ylabel('Accuracy')
     plt.legend()
-    plt.title(f'{model_type} Training and Validation Accuracy (WinSize = {window_size})')
+    plt.title(f'{model_name} Training and Validation Accuracy (WinSize = {window_size})')
     plt.savefig(acc_path)
     print(f'Accuracy Diagram Saved To: {acc_path}')
     plt.close()
+
+    # Save the results to Excel with run number and date
+    write_results_to_excel(excel_filename, run_number, current_datetime, user_input, num_epochs, train_accuracy, train_precision, train_recall, train_f1_score, val_accuracy, val_precision, val_recall, val_f1_score, train_losses, val_losses)
 
     return train_losses, val_losses
 

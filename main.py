@@ -46,37 +46,44 @@ motion_model = motion_analysis.MotionLSTM()
 
 
 user_input =  0
+model_name = ''
 while True:
     user_input = input("Do you want to train GPM (1), GP (2), GPM2 (3), GPM2-opt (4), GP-opt (5), GPM-opt (6)? Enter '1', '2', '3', '4', '5', '6': ").strip().upper()
     if user_input == '1':
         gun_model = CustomDarknet53(darknet_model)
         combined_feature_size = 20 + 20 + 20 #total num of features of 3 model outputs
         combined_model = CombinedModel(gun_model, pose_model, motion_model, combined_feature_size)
+        model_name = 'GPM'
         break
     elif user_input == '2':
         gun_model = CustomDarknet53(darknet_model)
         combined_feature_size = 20 + 20 #total num of features of 3 model outputs
         combined_model = CombinedModelNoMotion(gun_model, pose_model, combined_feature_size)
+        model_name = 'GP'
         break
     elif user_input == '3':
         gun_model = GunLSTM(darknet_model)
         combined_feature_size = 20 + 20 #total num of features of 3 model outputs
         combined_model = CombinedModelNewVer(gun_model, pose_model, combined_feature_size)
+        model_name = 'GPM2'
         break
     elif user_input == '4':
         gun_model = GunLSTM_Optimized()
         combined_feature_size = 20 + 20 #total num of features of 3 model outputs
         combined_model = CombinedModelNewVer(gun_model, pose_model, combined_feature_size)
+        model_name = 'GPM2-opt'
         break
     elif user_input == '5':
         gun_model = Gun_Optimized()
         combined_feature_size = 20 + 20 #total num of features of 3 model outputs
         combined_model = CombinedModelNewVer(gun_model, pose_model, combined_feature_size)
+        model_name = 'GP-opt'
         break
     elif user_input == '6':
         gun_model = Gun_Optimized()
         combined_feature_size = 20 + 20 + 20 #total num of features of 3 model outputs
         combined_model = CombinedModel(gun_model, pose_model, motion_model, combined_feature_size)
+        model_name = 'GPM-opt'
         break
     else:
         print("Invalid input. Please enter '1' for all three models or '2' for combined model with no motion or '3' for new motion model.")
@@ -85,7 +92,7 @@ while True:
 combined_model.to(device)
 combined_model.eval()
 
-window_size = 5
+window_size = 3
 
 if user_input == '3': 
     # DATASET FOR NEW MODEL
@@ -142,7 +149,7 @@ excel_filename = 'logs/results.xlsx'
 
 # Print Hyperparameters
 print(f'''
-    Model Type    : {'GPM' if user_input == '1' else 'GP' if user_input == '2' else 'GPM2'}
+    Model Type    : {model_name}
     Window Size   : {window_size}
     Train Set Size: {len(train_dataset)}
     Val Set Size  : {len(val_dataset)}
