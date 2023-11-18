@@ -62,9 +62,10 @@ def train_model(user_input, train_loader, val_loader, combined_model, criterion,
         os.makedirs(log_folder)
 
     print("")
-    print("Training Started: ")
+    print("Training Started: \n")
 
     for epoch in range(num_epochs):
+        print(f'[Epoch {epoch+1}/{num_epochs}] 0/{len(train_loader)}', end='\r')
         start_time = time.time()
         combined_model.train()
         total_train_loss = 0
@@ -73,8 +74,10 @@ def train_model(user_input, train_loader, val_loader, combined_model, criterion,
         train_predictions = []
         train_targets = []
 
-        for batch in train_loader:
+        for index, batch in enumerate(train_loader):
             data_name, gun_data, pose_data, motion_data, target_labels = batch
+
+            print(f'[Epoch {epoch+1}/{num_epochs}] {index}/{len(train_loader)}', end='\r')
 
             gun_data = gun_data.to(device)
             pose_data = pose_data.to(device)
@@ -95,7 +98,7 @@ def train_model(user_input, train_loader, val_loader, combined_model, criterion,
             loss = criterion(combined_output, target_labels)
             loss.backward()
 
-            nn.utils.clip_grad_norm_(combined_model.parameters(), max_norm=2)
+            # nn.utils.clip_grad_norm_(combined_model.parameters(), max_norm=2)
 
             optimizer.step()
 
@@ -206,7 +209,7 @@ def train_model(user_input, train_loader, val_loader, combined_model, criterion,
     plt.xlabel('Epoch')
     plt.ylabel('Loss')
     plt.legend()
-    plt.title(f'{model_name} Training and Validation Loss (WinSize = {window_size})')
+    plt.title(f'{model_name} Training and Validation Loss')
     plt.savefig(loss_path)
     print(f'Loss Diagram Saved To: {loss_path}')
     plt.close()
@@ -219,7 +222,7 @@ def train_model(user_input, train_loader, val_loader, combined_model, criterion,
     plt.xlabel('Epoch')
     plt.ylabel('Accuracy')
     plt.legend()
-    plt.title(f'{model_name} Training and Validation Accuracy (WinSize = {window_size})')
+    plt.title(f'{model_name} Training and Validation Accuracy')
     plt.savefig(acc_path)
     print(f'Accuracy Diagram Saved To: {acc_path}')
     plt.close()
