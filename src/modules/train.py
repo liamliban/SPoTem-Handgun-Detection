@@ -65,7 +65,6 @@ def train_model(user_input, train_loader, val_loader, combined_model, criterion,
     print("Training Started: \n")
 
     for epoch in range(num_epochs):
-        print(f'[Epoch {epoch+1}/{num_epochs}] 0/{len(train_loader)}', end='\r')
         start_time = time.time()
         combined_model.train()
         total_train_loss = 0
@@ -73,11 +72,11 @@ def train_model(user_input, train_loader, val_loader, combined_model, criterion,
         total = 0
         train_predictions = []
         train_targets = []
-
+        numBatches = len(train_loader)
         for index, batch in enumerate(train_loader):
             data_name, gun_data, pose_data, motion_data, target_labels = batch
 
-            print(f'[Epoch {epoch+1}/{num_epochs}] {index}/{len(train_loader)}', end='\r')
+            print(f'Epoch [{epoch+1}/{num_epochs}] {index}/{numBatches}', end='\r')
 
             gun_data = gun_data.to(device)
             pose_data = pose_data.to(device)
@@ -106,6 +105,7 @@ def train_model(user_input, train_loader, val_loader, combined_model, criterion,
             train_predictions.extend(predicted.cpu().numpy())
             train_targets.extend(target_labels.cpu().numpy())
 
+        print(f'Epoch [{epoch+1}/{num_epochs}] {numBatches}/{numBatches}', end='\r')
         train_accuracy = 100 * correct / total
         train_precision = precision_score(train_targets, train_predictions, average='weighted')
         train_recall = recall_score(train_targets, train_predictions, average='weighted')
