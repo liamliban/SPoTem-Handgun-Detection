@@ -42,8 +42,11 @@ darknet_model = darknet53(pretrained=True)
 
 pose_model = poseCNN()
 
-motion_model = motion_analysis.MotionLSTM()
-
+hidden_size = 1
+window_size = 5
+lstm_layers = 1
+batch_size = 16
+learning_rate = 1e-5
 
 user_input =  0
 model_name = ''
@@ -51,7 +54,8 @@ while True:
     user_input = input("Do you want to train GPM (1), GP (2), GPM2 (3), GPM2-opt (4), GP-opt (5), GPM-opt (6)? Enter '1', '2', '3', '4', '5', '6': ").strip().upper()
     if user_input == '1':
         gun_model = CustomDarknet53(darknet_model)
-        combined_feature_size = 20 + 20 + 20 #total num of features of 3 model outputs
+        motion_model = motion_analysis.MotionLSTM(hidden_size, lstm_layers)
+        combined_feature_size = 20 + 20 + hidden_size #total num of features of 3 model outputs
         combined_model = CombinedModel(gun_model, pose_model, motion_model, combined_feature_size)
         model_name = 'GPM'
         break
@@ -62,14 +66,14 @@ while True:
         model_name = 'GP'
         break
     elif user_input == '3':
-        gun_model = GunLSTM(darknet_model)
-        combined_feature_size = 20 + 20 #total num of features of 3 model outputs
+        gun_model = GunLSTM(darknet_model, hidden_size=hidden_size)
+        combined_feature_size = 20 + hidden_size #total num of features of 3 model outputs
         combined_model = CombinedModelNewVer(gun_model, pose_model, combined_feature_size)
         model_name = 'GPM2'
         break
     elif user_input == '4':
-        gun_model = GunLSTM_Optimized()
-        combined_feature_size = 20 + 20 #total num of features of 3 model outputs
+        gun_model = GunLSTM_Optimized(hidden_size, lstm_layers)
+        combined_feature_size = 20 + hidden_size #total num of features of 3 model outputs
         combined_model = CombinedModelNewVer(gun_model, pose_model, combined_feature_size)
         model_name = 'GPM2-opt'
         break
@@ -81,7 +85,8 @@ while True:
         break
     elif user_input == '6':
         gun_model = Gun_Optimized()
-        combined_feature_size = 20 + 20 + 20 #total num of features of 3 model outputs
+        motion_model = motion_analysis.MotionLSTM(hidden_size, lstm_layers)
+        combined_feature_size = 20 + 20 + hidden_size #total num of features of 3 model outputs
         combined_model = CombinedModel(gun_model, pose_model, motion_model, combined_feature_size)
         model_name = 'GPM-opt'
         break
@@ -90,21 +95,19 @@ while True:
 
 
 combined_model.to(device)
-combined_model.eval()
-
-window_size = 3
+print(combined_model.eval())
 
 if user_input == '3': 
     # DATASET FOR NEW MODEL
     custom_dataset = CustomGunLSTMDataset(root_dir='data', window_size = window_size)
 elif user_input == '4': 
     # DATASET FOR NEW MODEL optimized
-    custom_dataset = CustomGunLSTMDataset_opt(root_dir='data', window_size = window_size)
+    custom_dataset = CustomGunLSTMDataset_opt(root_dir='data2', window_size = window_size)
 elif user_input == '5' or user_input == '6': 
     # DATASET FOR old model optimized
-    custom_dataset = CustomGunDataset_opt(root_dir='data', window_size = window_size)
+    custom_dataset = CustomGunDataset_opt(root_dir='data2', window_size = window_size)
 else:    
-    custom_dataset = CustomGunDataset(root_dir='data', window_size = window_size)
+    custom_dataset = CustomGunDataset(root_dir='data2', window_size = window_size)
 
 print ("Number of samples in dataset: ", len(custom_dataset))
 
@@ -131,26 +134,28 @@ print ("Number of label 1: ", label_1)
 # Split the dataset into training and validation sets
 train_dataset, val_dataset = train_test_split(custom_dataset, test_size=0.2, random_state=42)
 
-batch_size = 4
-
 train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
 val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False)
 
 criterion = torch.nn.CrossEntropyLoss()
-optimizer = optim.Adam(combined_model.parameters(), lr=0.001)
+optimizer = optim.Adam(combined_model.parameters(), lr=learning_rate)
 
 # Set the device
 device = 'cuda:0' if torch.cuda.is_available() else 'cpu'
 
 # Training loop
-num_epochs = 60
+num_epochs = 2
 
 excel_filename = 'logs/results.xlsx'
 
+# Print Architecture
+
 # Print Hyperparameters
-print(f'''
+hyperparams = f'''
     Model Type    : {model_name}
     Window Size   : {window_size}
+    Hidden Size   : {hidden_size}
+    LSTM Layers   : {lstm_layers}
     Train Set Size: {len(train_dataset)}
     Val Set Size  : {len(val_dataset)}
     Batch Size    : {batch_size}
@@ -158,6 +163,10 @@ print(f'''
     Optimizer     : {optimizer.__class__.__name__}
     Learning Rate : {optimizer.param_groups[0]['lr']}
     Epochs        : {num_epochs}
-''')
 
-train_losses, val_losses = train_model(user_input, train_loader, val_loader, combined_model, criterion, optimizer, device, num_epochs, excel_filename, window_size=window_size)
+'''
+
+print(hyperparams)
+
+
+train_losses, val_losses = train_model(user_input, train_loader, val_loader, combined_model, criterion, optimizer, device, num_epochs, excel_filename, hyperparams=hyperparams)

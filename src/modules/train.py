@@ -23,7 +23,7 @@ torch.backends.cudnn.enabled = False
 
 torch.backends.cudnn.deterministic=True
 
-def train_model(user_input, train_loader, val_loader, combined_model, criterion, optimizer, device, num_epochs, excel_filename, save=False, window_size=None):
+def train_model(user_input, train_loader, val_loader, combined_model, criterion, optimizer, device, num_epochs, excel_filename, save=False, hyperparams=''):
     train_losses = []  # To store training losses for each epoch
     val_losses = []    # To store validation losses for each epoch
     train_accuracies = []
@@ -186,18 +186,13 @@ def train_model(user_input, train_loader, val_loader, combined_model, criterion,
     # Save per Epoch data
     output_log_path = f'{log_folder}run#{run_number}_OutputLog.txt'
     with open(output_log_path, 'w') as file:
-        file.write(f'Model Type    : {model_name}\n')
-        if window_size is not None:
-            file.write(f'Window Size   : {window_size}')
-        file.write(f'Train Set Size: {len(train_loader.dataset)}\n')
-        file.write(f'Val Set Size  : {len(val_loader.dataset)}\n')
-        file.write(f'Batch Size    : {train_loader.batch_size}\n')
-        file.write(f'Criterion     : {criterion.__class__.__name__}\n')
-        file.write(f'Optimizer     : {optimizer.__class__.__name__}\n')
-        file.write(f'Learning Rate : {optimizer.param_groups[0]["lr"]}\n')
-        file.write(f'Epochs        : {num_epochs}\n\n')
+        model_architecture = '\t' + (str(combined_model)).replace("\n", "\n\t")
+        file.write(f'Model Architecture:\n{model_architecture}\n')
+        if hyperparams != '':
+            file.write(f'\nHyperparameters:{hyperparams}')
+        file.write('Per Epoch Output:\n')
         for output in outputs:
-            file.write(output + '\n')
+            file.write('\t' + output.replace('\n', '\n\t') + '\n')
 
         print(f'Output log saved to: {output_log_path}')
 

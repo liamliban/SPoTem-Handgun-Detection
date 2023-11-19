@@ -60,12 +60,12 @@ def get_one_sequence(file_path, frame_num, window_size):
     return data
 
 class MotionLSTM(nn.Module):
-    def __init__(self):
+    def __init__(self, hidden_size=20, lstm_layers=1):
         super(MotionLSTM, self).__init__()
         self.input_size = 36
-        self.hidden_size = 20
-        self.num_layers = 1
-        self.output_size = 20
+        self.hidden_size = hidden_size
+        self.num_layers = lstm_layers
+        self.output_size = hidden_size
         self.lstm = nn.LSTM(self.input_size, self.hidden_size, self.num_layers, batch_first=True)
         self.fc = nn.Linear(self.hidden_size, self.output_size)
 

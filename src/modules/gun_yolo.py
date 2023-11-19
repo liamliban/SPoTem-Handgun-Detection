@@ -45,7 +45,7 @@ class CustomDarknet53(nn.Module):
 
 
 class GunLSTM(nn.Module):
-    def __init__(self, darknet_model):
+    def __init__(self, darknet_model, hidden_size=20):
         super(GunLSTM, self).__init__()
 
         # Load the pretrained darknet53 model
@@ -61,7 +61,7 @@ class GunLSTM(nn.Module):
         self.cnn = self.darknet2
         self.lstm = nn.LSTM(
             input_size=1024, 
-            hidden_size=20, 
+            hidden_size=hidden_size, 
             num_layers=1,
             batch_first=True)
         
@@ -114,25 +114,20 @@ class Gun_Optimized(nn.Module):
         return x
 
 class GunLSTM_Optimized(nn.Module): #instead of running darknet53 inside, take the tensors from previously evaluated hand images instead
-    def __init__(self):
+    def __init__(self, hidden_size=20, lstm_layers=1):
         super(GunLSTM_Optimized, self).__init__()
 
         self.lstm = nn.LSTM(
             input_size=1024, 
-            hidden_size=20, 
-            num_layers=1,
+            hidden_size=hidden_size, 
+            num_layers=lstm_layers,
             batch_first=True)
         
-        # self.dropout = nn.Dropout(0.2)
-        
-        # self.linear = nn.Linear(20,20)
 
     def forward(self, x):
         
         r_out, (h_n, h_c) = self.lstm(x)
         r_out = r_out[:, -1, :]
-        # r_out = self.dropout(r_out)
-        # r_out2 = self.linear(r_out)
         
         return r_out
 
