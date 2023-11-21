@@ -24,7 +24,7 @@ torch.backends.cudnn.deterministic=True
 
 class CustomGunLSTMDataset(Dataset):
     
-    def __init__(self, root_dir, window_size = 3, transform=None, video=None):
+    def __init__(self, root_dir, window_size = 3, transform=None, video=None, showLog=False):
         self.data_dir = root_dir
         self.window_size = window_size
         self.data = []  # A list to store data entries
@@ -36,10 +36,11 @@ class CustomGunLSTMDataset(Dataset):
             video_names = _list_subfolders(root_dir)
         else:
             video_names.append(str(video))
-        print("video list detected by CustomGunDataset: ", video_names)
+        if showLog:
+            print("video list detected by CustomGunDataset: ", video_names)
 
         # Load data entries based on the directory structure
-        for video_name in video_names:
+        for index, video_name in enumerate(video_names):
             video_dir = os.path.join(root_dir, str(video_name))
             annotation_path = os.path.join(video_dir, 'video_labels.csv')
             
@@ -59,7 +60,8 @@ class CustomGunLSTMDataset(Dataset):
 
                     # Check if all required directories exist
                     if not os.path.exists(hand_folder_path) or not os.path.exists(pose_folder_path) or not os.path.exists(motion_folder_path):
-                        print(f"Skipping subdir {person_name}: Required directories missing.")
+                        if showLog:
+                            print(f"Skipping subdir {person_name}: Required directories missing.")
                         continue  # Skip to the next subdir
                     
                     else:
@@ -70,6 +72,9 @@ class CustomGunLSTMDataset(Dataset):
                     
                         
                         for frame_num in range(num_frames):
+                            if not showLog:
+                                print(f'Loading Dataset...[{index}/{len(video_names)}][{person_id}/{num_person}][{frame_num}/{num_frames}]      ', end='\r')
+                                
                             hand_path = os.path.join(hand_folder_path, 'hands_' + str(frame_num) + '.png')
                             pose_path = os.path.join(pose_folder_path, 'pose_' + str(frame_num) + '.png')
                             motion_path = os.path.join(motion_folder_path, "keypoints_seq.txt")
@@ -128,7 +133,8 @@ class CustomGunLSTMDataset(Dataset):
                                                 if not data_label:
                                                     data_label = None
                                 else:
-                                    print(f"No match found in CSV file for {person_name}")
+                                    if showLog:
+                                        print(f"No match found in CSV file for {person_name}")
 
                             
                             sample_name = f"Vid{video_name}_{person_name}_Frame{frame_num}"
@@ -149,10 +155,13 @@ class CustomGunLSTMDataset(Dataset):
                                 }
                                 self.data.append(data_entry)
                             else:
-                                print(f"Skipping {sample_name}:")
-                                print("\tGun data exist: ", gun_data_exist)
-                                print("\tPose data exist: ", pose_data_exist)
+                                if showLog:
+                                    print(f"Skipping {sample_name}:")
+                                    print("\tGun data exist: ", gun_data_exist)
+                                    print("\tPose data exist: ", pose_data_exist)
                                 continue  # Continue to the next image
+        if not showLog:
+            print(f'Loading Dataset...[{len(video_names)}/{len(video_names)}]                            ')
 
     def __len__(self):
         return len(self.data)
