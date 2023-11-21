@@ -1,3 +1,4 @@
+import pandas as pd
 import torch
 import os
 from src.modules import motion_analysis
@@ -163,10 +164,9 @@ hyperparams = {
     'learning_rate' : optimizer.param_groups[0]['lr'],
     'epochs'        : num_epochs
 }
-
-# Print Hyperparams
-for key, value in hyperparams.items():
-    print(f'{key}\t: {value}')
+df = pd.DataFrame([hyperparams]).T.rename(columns={0: 'Value'})
+df = df.reset_index().rename(columns={'index': 'Hyperparameter'})
+print('\n' + df.to_string(index=False))
 
 run_number, trained_model, train_losses, val_losses = train_model(
     user_input, 
