@@ -42,11 +42,12 @@ darknet_model = darknet53(pretrained=True)
 
 pose_model = poseCNN()
 
-hidden_size = 1
+hidden_size = 100
 window_size = 5
 lstm_layers = 1
 batch_size = 16
 learning_rate = 1e-5
+num_epochs = 60
 
 user_input =  0
 model_name = ''
@@ -102,12 +103,12 @@ if user_input == '3':
     custom_dataset = CustomGunLSTMDataset(root_dir='data', window_size = window_size)
 elif user_input == '4': 
     # DATASET FOR NEW MODEL optimized
-    custom_dataset = CustomGunLSTMDataset_opt(root_dir='data2', window_size = window_size)
+    custom_dataset = CustomGunLSTMDataset_opt(root_dir='data', window_size = window_size)
 elif user_input == '5' or user_input == '6': 
     # DATASET FOR old model optimized
-    custom_dataset = CustomGunDataset_opt(root_dir='data2', window_size = window_size)
+    custom_dataset = CustomGunDataset_opt(root_dir='data', window_size = window_size)
 else:    
-    custom_dataset = CustomGunDataset(root_dir='data2', window_size = window_size)
+    custom_dataset = CustomGunDataset(root_dir='data', window_size = window_size)
 
 print ("Number of samples in dataset: ", len(custom_dataset))
 
@@ -127,6 +128,7 @@ for idx, data_entry in enumerate(custom_dataset.data):
     elif label == '1':
         label_1+=1
 
+print (combined_model)
 print ("Number of label 0: ", label_0)
 print ("Number of label 1: ", label_1)
 
@@ -143,30 +145,76 @@ optimizer = optim.Adam(combined_model.parameters(), lr=learning_rate)
 # Set the device
 device = 'cuda:0' if torch.cuda.is_available() else 'cpu'
 
-# Training loop
-num_epochs = 2
-
 excel_filename = 'logs/results.xlsx'
 
 # Print Architecture
 
 # Print Hyperparameters
-hyperparams = f'''
-    Model Type    : {model_name}
-    Window Size   : {window_size}
-    Hidden Size   : {hidden_size}
-    LSTM Layers   : {lstm_layers}
-    Train Set Size: {len(train_dataset)}
-    Val Set Size  : {len(val_dataset)}
-    Batch Size    : {batch_size}
-    Criterion     : {criterion.__class__.__name__}
-    Optimizer     : {optimizer.__class__.__name__}
-    Learning Rate : {optimizer.param_groups[0]['lr']}
-    Epochs        : {num_epochs}
+hyperparams = {
+    'model_type'    : model_name,
+    'window_size'   : window_size,
+    'hidden_size'   : hidden_size,
+    'lstm_layers'   : lstm_layers,
+    'train_set_size': len(train_dataset),
+    'val_set_size'  : len(val_dataset),
+    'batch_size'    : batch_size,
+    'criterion'     : criterion.__class__.__name__,
+    'optimizer'     : optimizer.__class__.__name__,
+    'learning_rate' : optimizer.param_groups[0]['lr'],
+    'epochs'        : num_epochs
+}
 
-'''
+# Print Hyperparams
+for key, value in hyperparams.items():
+    print(f'{key}\t: {value}')
 
-print(hyperparams)
+run_number, trained_model, train_losses, val_losses = train_model(
+    user_input, 
+    train_loader, 
+    val_loader, 
+    combined_model, 
+    criterion, 
+    optimizer, 
+    device, 
+    num_epochs, 
+    excel_filename, 
+    hyperparams=hyperparams,
+    save=True
+)
 
+# Look into incorrect predictions
+incorrect_predictions = []
+video_loader = DataLoader(val_dataset)
+trained_model.eval()
+with torch.no_grad():
+    for video in video_loader:
+        data_name, gun_data, pose_data, motion_data, target_label = video
 
-train_losses, val_losses = train_model(user_input, train_loader, val_loader, combined_model, criterion, optimizer, device, num_epochs, excel_filename, hyperparams=hyperparams)
+        gun_data = gun_data.to(device)
+        pose_data = pose_data.to(device)
+        motion_data = motion_data.to(device)
+        target_label = target_label.to(device)
+        
+        if user_input == '1' or user_input == '6':
+            combined_output = trained_model(gun_data, pose_data, motion_data)
+        else:
+            combined_output = trained_model(gun_data, pose_data)
+        
+        predicted_label = torch.argmax(combined_output)
+        if predicted_label != target_label:
+            incorrect_predictions.append({'data_name': data_name[0], 'predicted_label': predicted_label, 'target_label': target_label})
+
+# Save Incorrect Predictions
+incorrect_predictions_path = f'logs/run#{run_number}/run#{run_number}_IncorrectPredictions.txt'
+with open(incorrect_predictions_path, 'w') as file:
+    for item in incorrect_predictions:
+        file.write(item['data_name'] + ':\n')
+        file.write(f'  Predicted Label: {item["predicted_label"]}\n')
+        file.write(f'  Correct Label: {item["target_label"]}\n\n')
+    print(f'Incorrect Predictions saved to: {incorrect_predictions_path}')
+
+# for item in incorrect_predictions:
+#     print(item['data_name'] + ':')
+#     print(f'  Predicted Label: {item["predicted_label"]}')
+#     print(f'  Correct Label: {item["target_label"]}')
+#     print()
