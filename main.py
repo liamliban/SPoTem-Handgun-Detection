@@ -179,7 +179,7 @@ run_number, trained_model, train_losses, val_losses = train_model(
     num_epochs, 
     excel_filename, 
     hyperparams=hyperparams,
-    save=True
+    save=False
 )
 
 # Look into incorrect predictions
