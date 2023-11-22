@@ -16,13 +16,15 @@ device = 'cuda:0' if torch.cuda.is_available() else 'cpu'
 print("Device: " , device)
 
 # Change Checkpoint File Location here
-checkpoint_path = 'logs/run#49/model/model_epoch_2.pt'
+checkpoint_path = 'E:/Thesis/Thesis-Gun-Detection/logs/run#53/fold1/model/model_epoch_1.pt'
+print('/'.join(checkpoint_path.split("/")[:-2]))
+
 checkpoint = torch.load(checkpoint_path) 
 
-hidden_size = checkpoint['hyperparams']['hidden_size']
-window_size = checkpoint['hyperparams']['window_size']
-lstm_layers = checkpoint['hyperparams']['lstm_layers']
-model_type = checkpoint['hyperparams']['model_type']
+hidden_size = checkpoint['model_info']['hidden_size']
+window_size = checkpoint['model_info']['window_size']
+lstm_layers = checkpoint['model_info']['lstm_layers']
+model_type = checkpoint['model_info']['model_type']
 
 # Load Model and Data Based on Model Type
 darknet_model = darknet53(pretrained=True)
@@ -90,7 +92,7 @@ with torch.no_grad():
 
 # Show and Save Incorrect Predictions
 run_name = checkpoint_path.split("/")[1]
-incorrect_predictions_path = f'logs/{run_name}/{run_name}_IncorrectPredictions.txt'
+incorrect_predictions_path = '/'.join(checkpoint_path.split("/")[:-2]) + '/IncorrectPredictions.txt'
 with open(incorrect_predictions_path, 'w') as file:
     file.write('Incorrect Predictions:\n\n')
     for item in incorrect_predictions:
