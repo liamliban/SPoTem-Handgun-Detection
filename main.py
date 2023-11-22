@@ -151,7 +151,7 @@ excel_filename = 'logs/results.xlsx'
 # Print Architecture
 
 # Print Hyperparameters
-hyperparams = {
+model_info = {
     'model_type'    : model_name,
     'window_size'   : window_size,
     'hidden_size'   : hidden_size,
@@ -164,7 +164,7 @@ hyperparams = {
     'learning_rate' : optimizer.param_groups[0]['lr'],
     'epochs'        : num_epochs
 }
-df = pd.DataFrame([hyperparams]).T.rename(columns={0: 'Value'})
+df = pd.DataFrame([model_info]).T.rename(columns={0: 'Value'})
 df = df.reset_index().rename(columns={'index': 'Hyperparameter'})
 print('\n' + df.to_string(index=False))
 
@@ -178,7 +178,7 @@ run_number, trained_model, train_losses, val_losses = train_model(
     device, 
     num_epochs, 
     excel_filename, 
-    hyperparams=hyperparams,
+    model_info=model_info,
     save=False
 )
 
