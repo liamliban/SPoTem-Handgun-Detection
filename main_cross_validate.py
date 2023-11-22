@@ -48,7 +48,7 @@ window_size = 5
 lstm_layers = 1
 batch_size = 16
 learning_rate = 1e-5
-num_epochs = 2
+num_epochs = 60
 
 user_input =  0
 model_name = ''
@@ -94,7 +94,7 @@ if user_input == '3':
     custom_dataset = CustomGunLSTMDataset(root_dir='data', window_size = window_size)
 elif user_input == '4': 
     # DATASET FOR NEW MODEL optimized
-    custom_dataset = CustomGunLSTMDataset_opt(root_dir='data2', window_size = window_size)
+    custom_dataset = CustomGunLSTMDataset_opt(root_dir='data', window_size = window_size)
 elif user_input == '5' or user_input == '6': 
     # DATASET FOR old model optimized
     custom_dataset = CustomGunDataset_opt(root_dir='data', window_size = window_size)
@@ -126,7 +126,7 @@ val_loss = []
 folds = 5
 kf = KFold(n_splits=folds, random_state=42, shuffle=True)
 for fold_num, (train_indices, val_indices) in enumerate(kf.split(custom_dataset)):
-    
+
     # (Re)Initialize model
     if user_input == '1':
         combined_model = CombinedModel(gun_model, pose_model, motion_model, combined_feature_size)
