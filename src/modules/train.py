@@ -23,7 +23,18 @@ torch.backends.cudnn.enabled = False
 
 torch.backends.cudnn.deterministic=True
 
-def train_model(user_input, train_loader, val_loader, combined_model, criterion, optimizer, device, num_epochs, excel_filename, save=False, hyperparams=None):
+def train_model(user_input,
+                train_loader,
+                val_loader, 
+                combined_model, 
+                criterion, 
+                optimizer, 
+                device, 
+                num_epochs, 
+                excel_filename, 
+                save=False, 
+                model_info=None):
+
     train_losses = []  # To store training losses for each epoch
     val_losses = []    # To store validation losses for each epoch
     train_accuracies = []
@@ -165,35 +176,34 @@ def train_model(user_input, train_loader, val_loader, combined_model, criterion,
         output =  "Epoch [{}/{}], Training Accuracy: {:.2f}%, Training Loss: {:.4f}, Validation Accuracy: {:.2f}%, Validation Loss: {:.4f}, Time: {:.2f} seconds\n".format(epoch + 1, num_epochs, train_accuracy, average_train_loss, val_accuracy, average_val_loss, epoch_time)
         output += "Training Precision: {:.4f}, Training Recall: {:.4f}, Training F1 Score: {:.4f}\n".format(train_precision, train_recall, train_f1_score)
         output += "Validation Precision: {:.4f}, Validation Recall: {:.4f}, Validation F1 Score: {:.4f}\n".format(val_precision, val_recall, val_f1_score)
-        print(output, end='\r')
+        print(output + '\n', end='\r')
 
         outputs.append(output) # collect outputs
 
-        # Save Model
-        if save:
-            model_checkpoint = {
-                'epoch': epoch,
-                'model_state_dict': combined_model.state_dict(),
-                'optimizer_state_dict': optimizer.state_dict(),
-                'loss': loss
-            }
-            if hyperparams is not None:
-                model_checkpoint['hyperparams'] = hyperparams
-            model_folder = f'{log_folder}model/'
-            if not os.path.exists(model_folder):
-                os.makedirs(model_folder)
-            model_path = f'{model_folder}model_epoch_{epoch}.pt'
-            torch.save(model_checkpoint, model_path)
-            print(f'epoch model checkpoint saved in: {model_path}\n')
+    # Save Last Epoch Model
+    if save:
+        model_checkpoint = {
+            'model_state_dict': combined_model.state_dict(),
+            'optimizer_state_dict': optimizer.state_dict(),
+            'loss': loss
+        }
+        if model_info is not None:
+            model_checkpoint['model_info'] = model_info
+        model_folder = f'{log_folder}model/'
+        if not os.path.exists(model_folder):
+            os.makedirs(model_folder)
+        model_path = f'{model_folder}model_epoch_{epoch}.pt'
+        torch.save(model_checkpoint, model_path)
+        print(f'epoch model checkpoint saved in: {model_path}\n')
 
     # Save per Epoch data
     output_log_path = f'{log_folder}run#{run_number}_OutputLog.txt'
     with open(output_log_path, 'w') as file:
         model_architecture = '\t' + (str(combined_model)).replace("\n", "\n\t")
         file.write(f'Model Architecture:\n{model_architecture}\n')
-        if hyperparams is not None:
+        if model_info is not None:
             file.write('\nHyperparameters:\n')
-            for key, value in hyperparams.items():
+            for key, value in model_info.items():
                 file.write(f'\t{key}\t: {value}\n')
         file.write('Per Epoch Output:\n')
         for output in outputs:
