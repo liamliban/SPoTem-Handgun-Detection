@@ -18,7 +18,7 @@ torch.backends.cudnn.deterministic=True
 
 # Return concatenated image of hand regions
 # size: 2 x 1 
-def create_hand_image(image, hand_regions, frame_image_shape, output_image_width, frame_number, folder_path):
+def create_hand_image(image, hand_regions, frame_image_shape, output_image_width, frame_number, folder_path, save=True):
     output_image_size = (output_image_width * 2 , output_image_width)
     hand_image_size = (output_image_width , output_image_width)
     images_list = []
@@ -62,20 +62,23 @@ def create_hand_image(image, hand_regions, frame_image_shape, output_image_width
     if image_is_blank:
         return None, None
 
-    # File Path
-    file_name = f'{folder_path}/hands_{frame_number}.png'
+    if save:
+        # File Path
+        file_name = f'{folder_path}/hands_{frame_number}.png'
 
-    # Check Directory
-    if not os.path.exists(folder_path):
-        os.makedirs(folder_path)
+        # Check Directory
+        if not os.path.exists(folder_path):
+            os.makedirs(folder_path)
 
-    # Save Image
-    cv2.imwrite(file_name, concatenated_cropped)
+        # Save Image
+        cv2.imwrite(file_name, concatenated_cropped)
 
-    # Print Log
-    print(f'Hands Image Save in: {file_name}')
+        # Print Log
+        print(f'Hands Image Save in: {file_name}')
 
-    return concatenated_cropped, file_name
+        return concatenated_cropped, file_name
+    else:
+        return concatenated_cropped, ""
 
 def make_image_square(image, size):
     height, width, _ = image.shape

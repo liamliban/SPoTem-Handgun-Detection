@@ -77,7 +77,7 @@ class BinaryPose:
         return kp
 
     @classmethod
-    def createBinaryPose(cls, orig_keypoints, frame_number, folder_path):
+    def createBinaryPose(cls, orig_keypoints, frame_number, folder_path, save=True):
         keypoints = copy.deepcopy(orig_keypoints) 
         kp = cls.normalize(keypoints, copy=False) # no need to copy because we already copied
         
@@ -136,18 +136,22 @@ class BinaryPose:
         draw_line(kp[0]['x'], kp[0]['y'], kp[16]['x'], kp[16]['y'])
         draw_line(kp[17]['x'], kp[17]['y'], kp[16]['x'], kp[16]['y'])
 
-        # File Path
-        file_name = f'{folder_path}pose_{frame_number}.png'
+        if save:
+            # File Path
+            file_name = f'{folder_path}pose_{frame_number}.png'
 
-        # Check Directory
-        if not os.path.exists(folder_path):
-            os.makedirs(folder_path)
+            # Check Directory
+            if not os.path.exists(folder_path):
+                os.makedirs(folder_path)
 
-        # Save Image
-        image.save(file_name)
+            # Save Image
+            image.save(file_name)
 
-        # Print Log
-        print(f'Binary Pose Image Save in: {file_name}')
+            # Print Log
+            print(f'Binary Pose Image Save in: {file_name}')
 
-        keypoints['keypoints'] = kp # save the normalized pose keypoints
-        return keypoints, file_name
+            keypoints['keypoints'] = kp # save the normalized pose keypoints
+            return keypoints, file_name
+        else:
+            keypoints['keypoints'] = kp # save the normalized pose keypoints
+            return image, ""
