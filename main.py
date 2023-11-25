@@ -137,6 +137,32 @@ print ("Number of label 1: ", label_1)
 # Split the dataset into training and validation sets
 train_dataset, val_dataset = train_test_split(custom_dataset, test_size=0.2, random_state=42)
 
+
+# Count labels in train and validation datasets
+train_label_0, train_label_1 = 0, 0
+val_label_0, val_label_1 = 0, 0
+
+# Iterate over the training dataset
+for data_entry in train_dataset:
+    label = data_entry[-1].item()
+    if label == 0:
+        train_label_0 += 1
+    elif label == 1:
+        train_label_1 += 1
+
+# Iterate over the validation dataset
+for data_entry in val_dataset:
+    label = data_entry[-1].item()
+    if label == 0:
+        val_label_0 += 1
+    elif label == 1:
+        val_label_1 += 1
+
+# Print the count of data points and labels in train and validation sets
+print("Training Set: Total Data Points =", len(train_dataset), "Label 0 =", train_label_0, "Label 1 =", train_label_1)
+print("Validation Set: Total Data Points =", len(val_dataset), "Label 0 =", val_label_0, "Label 1 =", val_label_1)
+
+
 train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
 val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False)
 
