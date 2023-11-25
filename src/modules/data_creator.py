@@ -3,6 +3,7 @@ import os
 import json
 import copy
 import csv
+import re
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 from src.body import Body
@@ -51,7 +52,11 @@ def create_data(dataset_folder, video_label, data_folder, display_animation = Fa
 
     # Get a list of image file names in the folder
     image_files = [f for f in os.listdir(image_folder) if f.endswith('.jpg')]
-    image_files.sort()  # Sort the files to ensure the correct order
+    # image_files.sort()  # Sort the files to ensure the correct order
+
+    def natural_sort_key(s):
+        return [int(text) if text.isdigit() else text.lower() for text in re.split('([0-9]+)', s)]
+    image_files = sorted(image_files, key=natural_sort_key) # Sort the files to ensure the correct order
 
     # Initialize a list to store the keypoints data (sequence)
     keypoints_data = []
