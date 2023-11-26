@@ -6,8 +6,7 @@ from yolo.pytorchyolo import models
 import torchvision.transforms as transforms
 from src.modules.posecnn import poseCNN
 from src.modules.gun_yolo import CustomDarknet53, GunLSTM, GunLSTM_Optimized, Gun_Optimized
-from src.modules.combined_model import CombinedModel, CombinedModelNewVer
-from src.modules.combined_model_no_motion import CombinedModelNoMotion
+from src.modules.combined_model import GPM1, GPM2, GP_Opt, GP
 from src.modules.custom_dataset import CustomGunDataset
 from src.modules.custom_dataset_gunLSTM import CustomGunLSTMDataset
 from src.modules.custom_dataset_gunLSTM_opt import CustomGunLSTMDataset_opt
@@ -43,9 +42,9 @@ darknet_model = darknet53(pretrained=True)
 
 pose_model = poseCNN()
 
-hidden_size = 100
-window_size = 5
-lstm_layers = 1
+hidden_size = 512
+window_size = 16
+lstm_layers = 2
 batch_size = 16
 learning_rate = 1e-5
 num_epochs = 60
@@ -58,38 +57,38 @@ while True:
         gun_model = CustomDarknet53(darknet_model)
         motion_model = motion_analysis.MotionLSTM(hidden_size, lstm_layers)
         combined_feature_size = 20 + 20 + hidden_size #total num of features of 3 model outputs
-        combined_model = CombinedModel(gun_model, pose_model, motion_model, combined_feature_size)
+        combined_model = GPM1(gun_model, pose_model, motion_model, combined_feature_size)
         model_name = 'GPM'
         break
     elif user_input == '2':
         gun_model = CustomDarknet53(darknet_model)
         combined_feature_size = 20 + 20 #total num of features of 3 model outputs
-        combined_model = CombinedModelNoMotion(gun_model, pose_model, combined_feature_size)
+        combined_model = GP(gun_model, pose_model, combined_feature_size)
         model_name = 'GP'
         break
     elif user_input == '3':
         gun_model = GunLSTM(darknet_model, hidden_size=hidden_size)
         combined_feature_size = 20 + hidden_size #total num of features of 3 model outputs
-        combined_model = CombinedModelNewVer(gun_model, pose_model, combined_feature_size)
+        combined_model = GPM2(gun_model, pose_model, combined_feature_size)
         model_name = 'GPM2'
         break
     elif user_input == '4':
         gun_model = GunLSTM_Optimized(hidden_size, lstm_layers)
         combined_feature_size = 20 + hidden_size #total num of features of 3 model outputs
-        combined_model = CombinedModelNewVer(gun_model, pose_model, combined_feature_size)
+        combined_model = GPM2(gun_model, pose_model, combined_feature_size)
         model_name = 'GPM2-opt'
         break
     elif user_input == '5':
         gun_model = Gun_Optimized()
         combined_feature_size = 20 + 20 #total num of features of 3 model outputs
-        combined_model = CombinedModelNewVer(gun_model, pose_model, combined_feature_size)
+        combined_model = GP_Opt(gun_model, pose_model, combined_feature_size)
         model_name = 'GP-opt'
         break
     elif user_input == '6':
         gun_model = Gun_Optimized()
         motion_model = motion_analysis.MotionLSTM(hidden_size, lstm_layers)
         combined_feature_size = 20 + 20 + hidden_size #total num of features of 3 model outputs
-        combined_model = CombinedModel(gun_model, pose_model, motion_model, combined_feature_size)
+        combined_model = GPM1(gun_model, pose_model, motion_model, combined_feature_size)
         model_name = 'GPM-opt'
         break
     else:
@@ -98,18 +97,19 @@ while True:
 
 combined_model.to(device)
 print(combined_model.eval())
+root_dir = 'data2'
 
 if user_input == '3': 
     # DATASET FOR NEW MODEL
-    custom_dataset = CustomGunLSTMDataset(root_dir='data', window_size = window_size)
+    custom_dataset = CustomGunLSTMDataset(root_dir=root_dir, window_size = window_size)
 elif user_input == '4': 
     # DATASET FOR NEW MODEL optimized
-    custom_dataset = CustomGunLSTMDataset_opt(root_dir='data', window_size = window_size)
+    custom_dataset = CustomGunLSTMDataset_opt(root_dir=root_dir, window_size = window_size)
 elif user_input == '5' or user_input == '6': 
     # DATASET FOR old model optimized
-    custom_dataset = CustomGunDataset_opt(root_dir='data', window_size = window_size)
+    custom_dataset = CustomGunDataset_opt(root_dir=root_dir, window_size = window_size)
 else:    
-    custom_dataset = CustomGunDataset(root_dir='data', window_size = window_size)
+    custom_dataset = CustomGunDataset(root_dir=root_dir, window_size = window_size)
 
 print ("Number of samples in dataset: ", len(custom_dataset))
 

@@ -4,8 +4,8 @@ from yolo.pytorchyolo import models
 import torchvision.transforms as transforms
 from src.modules.posecnn import poseCNN
 from src.modules.gun_yolo import CustomYolo, CustomDarknet53, GunLSTM
-from src.modules.combined_model import CombinedModel
-from src.modules.combined_model_no_motion import CombinedModelNoMotion
+from src.modules.combined_model import GPM1
+from src.modules.combined_model_no_motion import GP
 from src.modules.custom_dataset_gunLSTM import CustomGunLSTMDataset
 from src.modules.train_gunlstm import train_model
 from torch.utils.data import DataLoader
@@ -88,7 +88,7 @@ print("Gun Model output shape: ", gun_output.shape)
 
 # combined model
 combined_feature_size = 20 + 20#total num of features of 3 model outputs
-combined_model = CombinedModelNoMotion(gun_model, pose_model, combined_feature_size)
+combined_model = GP(gun_model, pose_model, combined_feature_size)
 
 
 combined_model.to(device)

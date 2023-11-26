@@ -12,9 +12,9 @@ from src.modules.binarypose import BinaryPose
 from src.modules.gun_yolo import CustomDarknet53_NoDense
 from src.modules.posecnn import poseCNN
 from src.modules.gun_yolo import CustomDarknet53, GunLSTM, GunLSTM_Optimized, Gun_Optimized
-from src.modules.combined_model import CombinedModel, CombinedModelNewVer
+from src.modules.combined_model import GPM2
 from holocron.models import darknet53
-
+import time
 import torch
 from torchvision import transforms
 import torchvision
@@ -63,9 +63,11 @@ input_image = input_image.unsqueeze(0)
 # get hand feature by darknet53
 if torch.cuda.is_available():
     input_image = input_image.cuda()
-black_gun_feature_tensor = darknet_model(input_image)
 
-hand_tensors = [black_gun_feature_tensor] * window_size
+hand_tensors = []
+for _ in range (window_size):
+    black_gun_feature_tensor = [0] * 1024
+    hand_tensors.append(torch.tensor([black_gun_feature_tensor]).to(device))
 
 
 
@@ -146,6 +148,9 @@ def process_frame(frame_number):
                 preprocess = transforms.Compose([ transforms.ToTensor() ])
                 input_image = preprocess(hand_region_image)
                 input_image = input_image.unsqueeze(0)
+                print(input_image)
+                print(input_image.shape)
+                
 
                 # get hand feature by darknet53
                 if torch.cuda.is_available():
@@ -154,21 +159,30 @@ def process_frame(frame_number):
             else:
                 gun_feature_tensor = black_gun_feature_tensor
 
+            print(gun_feature_tensor)
+            print(gun_feature_tensor.shape)
+
             global hand_tensors
+            print('aaaaaa',hand_tensors)
             # shift hand list by one
             hand_tensors = hand_tensors[1:]
+            print('bbbbbb',hand_tensors)
             # appennd current hand tensor to the list
             hand_tensors.append(gun_feature_tensor)
+            print('cccccc', hand_tensors)
 
             gun_data = torch.cat(hand_tensors, dim=0)
             gun_data = gun_data.unsqueeze(0)
+            print(gun_data)
+            print(gun_data.shape)
 
 
             # transform binary pose image to tensor
-            preprocess = transforms.Compose([ transforms.ToTensor() ])
-            input_image = preprocess(binary_pose_image)
+            numpy_image = transforms.functional.to_tensor(binary_pose_image)
+            input_image = torch.tensor(numpy_image).clone().detach()
             input_image = input_image.unsqueeze(0)
             pose_data = input_image
+            input('...')
 
             print("person data:")
             # print("gun data:" , gun_data.size())
@@ -181,28 +195,33 @@ def process_frame(frame_number):
 
             # Change Checkpoint File Location here
             current_directory = os.path.dirname(os.path.abspath(__file__))
-            checkpoint_path = '/model/model_epoch_59.pt'
+            checkpoint_path = '/logs/run#45/model/model_epoch_58.pt'
             checkpoint_path = current_directory + checkpoint_path
 
             checkpoint = torch.load(checkpoint_path) 
+            checkpoint = checkpoint['model_state_dict']
+            value_to_change = checkpoint.pop('last.weight')
+            checkpoint['dense.weight'] = value_to_change
+            value_to_change = checkpoint.pop('last.bias')
+            checkpoint['dense.bias'] = value_to_change
 
-            hidden_size = checkpoint['hyperparams']['hidden_size']
-            lstm_layers = checkpoint['hyperparams']['lstm_layers']
+            hidden_size = 100
+            lstm_layers = 1
 
             # Load Model
             pose_model = poseCNN()
             gun_model = GunLSTM_Optimized(hidden_size, lstm_layers)
             combined_feature_size = 20 + hidden_size #total num of features of 3 model outputs
-            trained_model = CombinedModelNewVer(gun_model, pose_model, combined_feature_size)
-            trained_model.load_state_dict(checkpoint['model_state_dict'])
+            trained_model = GPM2(gun_model, pose_model, combined_feature_size)
+            trained_model.load_state_dict(checkpoint)
             trained_model.to(device)
             trained_model.eval()
-
-            gun_data = gun_data.to(device)
-            pose_data = pose_data.to(device)
-            combined_output = trained_model(gun_data, pose_data)
-            predicted_label = torch.argmax(combined_output)
-            predicted_label = predicted_label.item()
+            with torch.no_grad():
+                gun_data = gun_data.to(device)
+                pose_data = pose_data.to(device)
+                combined_output = trained_model(gun_data, pose_data)
+                predicted_label = torch.argmax(combined_output)
+                predicted_label = predicted_label.item()
 
             print("PREDICTED LABEL of person ", person_id, " at frame ", frame_number, ": ", predicted_label)
 
