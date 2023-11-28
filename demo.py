@@ -145,6 +145,32 @@ def process_frame(frame_number):
             if hand_region_image is not None:
                 cv2.imshow("hand region image", hand_region_image)
 
+                # Load the image as a numpy array
+                hand_region_image = cv2.cvtColor(hand_region_image, cv2.COLOR_BGR2RGB)
+                original_height, original_width = hand_region_image.shape[:2]
+                target_width = 416
+
+                # Calculate the scaling factor for the width to make it 416
+                scale_factor = target_width / original_width
+                scaled_image = cv2.resize(hand_region_image, (target_width, int(original_height * scale_factor)))
+
+                # Calculate the necessary padding for height
+                original_height, original_width = scaled_image.shape[:2]
+                target_height = 416
+                padding_height = max(target_height - original_height, 0)
+                
+                # Calculate the top and bottom padding dimensions
+                top = padding_height // 2
+                bottom = padding_height - top
+
+                # Pad the image to achieve the final size of 416x416
+                padded_image = cv2.copyMakeBorder(scaled_image, top, bottom, 0, 0, cv2.BORDER_CONSTANT, value=(0, 0, 0))
+
+                # TEMPORARY: resize the image to 224
+                padded_image = cv2.resize(padded_image, (224,224))
+
+                hand_region_image = padded_image
+
                 preprocess = transforms.Compose([ transforms.ToTensor() ])
                 input_image = preprocess(hand_region_image)
                 input_image = input_image.unsqueeze(0)
@@ -178,11 +204,13 @@ def process_frame(frame_number):
 
 
             # transform binary pose image to tensor
-            numpy_image = transforms.functional.to_tensor(binary_pose_image)
-            input_image = torch.tensor(numpy_image).clone().detach()
+            preprocess = transforms.Compose([ transforms.ToTensor() ])
+            input_image = preprocess(binary_pose_image)
+            # numpy_image = transforms.functional.to_tensor(binary_pose_image)
+            # input_image = torch.tensor(numpy_image).clone().detach()
             input_image = input_image.unsqueeze(0)
             pose_data = input_image
-            input('...')
+            # input('...')
 
             print("person data:")
             # print("gun data:" , gun_data.size())
@@ -195,15 +223,15 @@ def process_frame(frame_number):
 
             # Change Checkpoint File Location here
             current_directory = os.path.dirname(os.path.abspath(__file__))
-            checkpoint_path = '/logs/run#45/model/model_epoch_58.pt'
+            checkpoint_path = '/model/model_epoch_59.pt'
             checkpoint_path = current_directory + checkpoint_path
 
             checkpoint = torch.load(checkpoint_path) 
             checkpoint = checkpoint['model_state_dict']
-            value_to_change = checkpoint.pop('last.weight')
-            checkpoint['dense.weight'] = value_to_change
-            value_to_change = checkpoint.pop('last.bias')
-            checkpoint['dense.bias'] = value_to_change
+            # value_to_change = checkpoint.pop('last.weight')
+            # checkpoint['dense.weight'] = value_to_change
+            # value_to_change = checkpoint.pop('last.bias')
+            # checkpoint['dense.bias'] = value_to_change
 
             hidden_size = 100
             lstm_layers = 1
