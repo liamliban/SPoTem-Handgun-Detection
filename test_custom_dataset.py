@@ -4,8 +4,8 @@ from yolo.pytorchyolo import models
 import torchvision.transforms as transforms
 from src.modules.posecnn import poseCNN
 from src.modules.gun_yolo import CustomYolo
-from src.modules.combined_model import CombinedModel
-from src.modules.combined_model_no_motion import CombinedModelNoMotion
+from src.modules.combined_model import GPM1
+from src.modules.combined_model_no_motion import GP
 from src.modules.custom_dataset import CustomGunDataset
 
 device = 'cuda:0' if torch.cuda.is_available() else 'cpu'
@@ -112,7 +112,7 @@ print("\t\tOutput shape: ", motion_feature.shape)
 print("COMBINATION MODEL")
 combined_feature_size = 20 + 20 + 20 #total num of features of 3 model outputs
 
-combined_model = CombinedModel(gun_model, pose_model, motion_model, combined_feature_size)
+combined_model = GPM1(gun_model, pose_model, motion_model, combined_feature_size)
 combined_model.to(device)
 combined_model.eval()
 
@@ -125,7 +125,7 @@ print("\t\tCombined Model with Motion Output: ", combined_output)
 print("COMBINATION MODEL no Motion")
 combined_2_feature_size = 20 + 20 #total num of features of 2 model outputs
 
-combined_model_2 = CombinedModelNoMotion(gun_model, pose_model, combined_2_feature_size)
+combined_model_2 = GP(gun_model, pose_model, combined_2_feature_size)
 combined_model_2.to(device)
 combined_model_2.eval()
 

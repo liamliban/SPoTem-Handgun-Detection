@@ -74,8 +74,6 @@ def cross_validate( user_input,
     if not os.path.exists(log_folder): 
         os.makedirs(log_folder)
 
-    log_folder = f'logs/run#{run_number}/fold{fold_num+1}/'
-
     print("Training Started: \n")
 
     for epoch in range(num_epochs):
