@@ -6,8 +6,7 @@ from yolo.pytorchyolo import models
 import torchvision.transforms as transforms
 from src.modules.posecnn import poseCNN
 from src.modules.gun_yolo import CustomDarknet53, GunLSTM, GunLSTM_Optimized, Gun_Optimized
-from src.modules.combined_model import CombinedModel, CombinedModelNewVer
-from src.modules.combined_model_no_motion import CombinedModelNoMotion
+from src.modules.combined_model import GPM1, GPM2
 from src.modules.custom_dataset import CustomGunDataset
 from src.modules.custom_dataset_gunLSTM import CustomGunLSTMDataset
 from src.modules.custom_dataset_gunLSTM_opt import CustomGunLSTMDataset_opt
@@ -89,17 +88,18 @@ while True:
     else:
         print("Invalid input. Please enter '1' for all three models or '2' for combined model with no motion or '3' for new motion model.")
 
+root_dir = 'data'
 if user_input == '3': 
     # DATASET FOR NEW MODEL
-    custom_dataset = CustomGunLSTMDataset(root_dir='data', window_size = window_size)
+    custom_dataset = CustomGunLSTMDataset(root_dir=root_dir, window_size = window_size)
 elif user_input == '4': 
     # DATASET FOR NEW MODEL optimized
-    custom_dataset = CustomGunLSTMDataset_opt(root_dir='data', window_size = window_size)
+    custom_dataset = CustomGunLSTMDataset_opt(root_dir=root_dir, window_size = window_size)
 elif user_input == '5' or user_input == '6': 
     # DATASET FOR old model optimized
-    custom_dataset = CustomGunDataset_opt(root_dir='data', window_size = window_size)
+    custom_dataset = CustomGunDataset_opt(root_dir=root_dir, window_size = window_size)
 else:    
-    custom_dataset = CustomGunDataset(root_dir='data', window_size = window_size)
+    custom_dataset = CustomGunDataset(root_dir=root_dir, window_size = window_size)
 
 print ("Number of samples in dataset: ", len(custom_dataset))
 
@@ -129,17 +129,17 @@ for fold_num, (train_indices, val_indices) in enumerate(kf.split(custom_dataset)
 
     # (Re)Initialize model
     if user_input == '1':
-        combined_model = CombinedModel(gun_model, pose_model, motion_model, combined_feature_size)
+        combined_model = GPM1(gun_model, pose_model, motion_model, combined_feature_size)
     elif user_input == '2':
-        combined_model = CombinedModelNoMotion(gun_model, pose_model, combined_feature_size)
+        combined_model = GP(gun_model, pose_model, combined_feature_size)
     elif user_input == '3':
-        combined_model = CombinedModelNewVer(gun_model, pose_model, combined_feature_size)
+        combined_model = GPM2(gun_model, pose_model, combined_feature_size)
     elif user_input == '4':
-        combined_model = CombinedModelNewVer(gun_model, pose_model, combined_feature_size)
+        combined_model = GPM2(gun_model, pose_model, combined_feature_size)
     elif user_input == '5':
-        combined_model = CombinedModelNewVer(gun_model, pose_model, combined_feature_size)
+        combined_model = GPM2(gun_model, pose_model, combined_feature_size)
     elif user_input == '6':
-        combined_model = CombinedModel(gun_model, pose_model, motion_model, combined_feature_size)
+        combined_model = GPM1(gun_model, pose_model, motion_model, combined_feature_size)
 
     combined_model.to(device)
     criterion = torch.nn.CrossEntropyLoss()
@@ -154,7 +154,7 @@ for fold_num, (train_indices, val_indices) in enumerate(kf.split(custom_dataset)
     # Print Model Info
     print("\n")
     model_info = {
-        'fold'          : fold_num,
+        'fold'          : fold_num+1,
         'model_type'    : model_name,
         'window_size'   : window_size,
         'hidden_size'   : hidden_size,
