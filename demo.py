@@ -231,25 +231,24 @@ def process_frame(frame_number):
 
             # Change Checkpoint File Location here
             current_directory = os.path.dirname(os.path.abspath(__file__))
-            checkpoint_path = '/model/model_epoch_59.pt'
+            checkpoint_path = '/model/GPM2.pt'
             checkpoint_path = current_directory + checkpoint_path
 
             checkpoint = torch.load(checkpoint_path) 
-            checkpoint = checkpoint['model_state_dict']
             # value_to_change = checkpoint.pop('last.weight')
             # checkpoint['dense.weight'] = value_to_change
             # value_to_change = checkpoint.pop('last.bias')
             # checkpoint['dense.bias'] = value_to_change
 
-            hidden_size = 100
-            lstm_layers = 1
+            hidden_size = checkpoint['model_info']['hidden_size']
+            lstm_layers = checkpoint['model_info']['lstm_layers']
 
             # Load Model
             pose_model = poseCNN()
             gun_model = GunLSTM_Optimized(hidden_size, lstm_layers)
             combined_feature_size = 20 + hidden_size #total num of features of 3 model outputs
             trained_model = GPM2(gun_model, pose_model, combined_feature_size)
-            trained_model.load_state_dict(checkpoint)
+            trained_model.load_state_dict(checkpoint['model_state_dict'])
             trained_model.to(device)
             trained_model.eval()
             with torch.no_grad():
@@ -276,23 +275,33 @@ fig, ax = plt.subplots()
 # Create a function to update the animation
 def update(frame):
     global processed_frame_0
+    global predictions
     if frame == 0 and not processed_frame_0:
         # Process frame 0
         current_frame = process_frame(frame)
         plt.imshow(current_frame[:, :, [2, 1, 0]])  # Display the current frame
         plt.axis('off')
-        plt.title(f'Frame {frame}')
+        plt.title(f'Frame {frame}', loc='center', y=-0.1, fontsize=18, fontweight='bold')
+
+        # Show predictions per frame
+        for key, (x, y, pred) in predictions.items():
+            
+            plt.text(x-1, y, f"person_{key}: {pred}", color='black', fontsize=14, ha='center', fontweight='bold')
+            plt.text(x+1, y, f"person_{key}: {pred}", color='black', fontsize=14, ha='center', fontweight='bold')
+            plt.text(x, y-1, f"person_{key}: {pred}", color='black', fontsize=14, ha='center', fontweight='bold')
+            plt.text(x, y+1, f"person_{key}: {pred}", color='black', fontsize=14, ha='center', fontweight='bold')
+
+            plt.text(x, y, f"person_{key}: {pred}", color='yellow', fontsize=14, ha='center', fontweight='bold')
         processed_frame_0 = True
     else:
         if frame > 0:
-            global predictions
             # Process other frames
             plt.clf()  # Clear the previous frame
             predictions = {} # Clear previous frame predictions
             current_frame = process_frame(frame)
             plt.imshow(current_frame[:, :, [2, 1, 0]])  # Display the current frame
             plt.axis('off')
-            plt.title(f'Frame {frame}')
+            plt.title(f'Frame {frame}', loc='center', y=-0.1, fontsize=18, fontweight='bold')
 
             # Show predictions per frame
             for key, (x, y, pred) in predictions.items():
