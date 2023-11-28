@@ -22,7 +22,7 @@ class PersonIDNotFoundError(Exception):
 # Create file keypoints_seq_[person_id].txt which stores keypoints of frame per line with format
 # x0, y0, x1, y1 .... x17, y17
 def preprocess_data(keypoints_file_path, person_id, folder_path):  
-    null_value = 'Null'
+    null_value = 999
     keypoints_sequence = _get_normalized(keypoints_file_path, person_id, null_value)
 
     file_path = _save_keypoints(keypoints_sequence, person_id, folder_path)

@@ -46,11 +46,11 @@ def get_one_sequence(file_path, frame_num, window_size):
         #     return None
         sequence = []
         for i in range(frame_num - (window_size - 1), frame_num + 1):
-            null_value = '0'
             if i < 0:
-                line = [null_value] * 36
+                string = '999,999,999,999,999,999,999,999,999,999,999,999,999,999,999,999,999,999,999,999,999,999,999,999,999,999,999,999,999,999,999,999,999,999,999,999'
+                line = string.strip().split(',')
             else:
-                line = lines[i].strip().replace('Null', null_value).split(',')
+                line = lines[i].strip().split(',')
             sequence.append([float(val) for val in line])
         # data.append(sequence)
         data=sequence
