@@ -67,7 +67,7 @@ class BinaryPose:
         cls.prev_y1 = y1
 
         cls.neck_dist = math.sqrt(pow(x1 - x0, 2) + pow(y1 - y0, 2))
-        print("NECK NORMALIZATION", cls.neck_dist)
+        # print("NECK NORMALIZATION", cls.neck_dist)
 
         for i in kp:
             if i['x'] is None or i['y'] is None: continue
@@ -77,7 +77,7 @@ class BinaryPose:
         return kp
 
     @classmethod
-    def createBinaryPose(cls, orig_keypoints, frame_number, folder_path, save=True):
+    def createBinaryPose(cls, orig_keypoints, frame_number, folder_path, save=True, return_neck=False):
         keypoints = copy.deepcopy(orig_keypoints) 
         kp = cls.normalize(keypoints, copy=False) # no need to copy because we already copied
         
@@ -154,4 +154,11 @@ class BinaryPose:
             return keypoints, file_name
         else:
             keypoints['keypoints'] = kp # save the normalized pose keypoints
-            return image, ""
+            if return_neck:
+                return image, { 'person_id': keypoints['person_id'],
+                                'x': cls.prev_x0,
+                                'y': cls.prev_y0,
+                                'neck_dist': cls.neck_dist
+                              }
+            else:
+                return image, ""

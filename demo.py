@@ -64,19 +64,19 @@ input_image = input_image.unsqueeze(0)
 if torch.cuda.is_available():
     input_image = input_image.cuda()
 
-hand_tensors = []
-for _ in range (window_size):
-    black_gun_feature_tensor = [0] * 1024
-    hand_tensors.append(torch.tensor([black_gun_feature_tensor]).to(device))
+black_gun_feature_tensor = darknet_model(input_image)
+
+hand_tensors = [black_gun_feature_tensor] * window_size
 
 
+predictions = {} # <person_id>: (<x>, <y>, <prediction>)
 
 # Function to load and process an image frame
 def process_frame(frame_number):
-    print("")
-    print("Frame Num: ", frame_number)
+    # print("")
+    # print("Frame Num: ", frame_number)
     image_file = image_files[frame_number]
-    print(f"Processing image: {image_file}")
+    # print(f"Processing image: {image_file}")
 
     # Load the image
     test_image = os.path.join(image_folder, image_file)
@@ -102,8 +102,16 @@ def process_frame(frame_number):
         'keypoints': []
     }
 
+    # new_dict = {}
+    # # remove from predictions list extra persons
+    # for person_id in range(len(subset)):
+    #     if predictions.get(person_id) is not None:
+    #         new_dict[person_id] = predictions[person_id]
+
+    # predictions = new_dict # extra persons now removed
+
     for person_id in range(len(subset)):
-        print("Person ID: ", person_id)
+        # print("Person ID: ", person_id)
 
         confidence_min = 0.1
         # extract keypoints dictionary (person_id,keypoints)
@@ -118,7 +126,7 @@ def process_frame(frame_number):
         # get box coordinates of hand regions
         hand_intersect_threshold = 0.9
         hand_regions = handregion.extract_hand_regions(keypoints, hand_intersect_threshold)
-        print("Hand regions of resized image: ", hand_regions)
+        # print("Hand regions of resized image: ", hand_regions)
         
 
         # draw hand regions on canvas
@@ -135,15 +143,15 @@ def process_frame(frame_number):
 
         # generate binary pose image
         binary_folder = ""
-        binary_pose_image, _ = BinaryPose.createBinaryPose(keypoints, frame_number, binary_folder, save=False)
-
+        binary_pose_image, neck_kp = BinaryPose.createBinaryPose(keypoints, frame_number, binary_folder, save=False, return_neck=True)
+        
         if hand_region_image is not None and binary_pose_image is not None:
             # gen list of hand tensors
             global darknet_model
             darknet_model.to(device)
             darknet_model.eval()
             if hand_region_image is not None:
-                cv2.imshow("hand region image", hand_region_image)
+                # cv2.imshow("hand region image", hand_region_image)
 
                 # Load the image as a numpy array
                 hand_region_image = cv2.cvtColor(hand_region_image, cv2.COLOR_BGR2RGB)
@@ -174,8 +182,8 @@ def process_frame(frame_number):
                 preprocess = transforms.Compose([ transforms.ToTensor() ])
                 input_image = preprocess(hand_region_image)
                 input_image = input_image.unsqueeze(0)
-                print(input_image)
-                print(input_image.shape)
+                # print(input_image)
+                # print(input_image.shape)
                 
 
                 # get hand feature by darknet53
@@ -185,22 +193,22 @@ def process_frame(frame_number):
             else:
                 gun_feature_tensor = black_gun_feature_tensor
 
-            print(gun_feature_tensor)
-            print(gun_feature_tensor.shape)
+            # print(gun_feature_tensor)
+            # print(gun_feature_tensor.shape)
 
             global hand_tensors
-            print('aaaaaa',hand_tensors)
+            # print('aaaaaa',hand_tensors)
             # shift hand list by one
             hand_tensors = hand_tensors[1:]
-            print('bbbbbb',hand_tensors)
+            # print('bbbbbb',hand_tensors)
             # appennd current hand tensor to the list
             hand_tensors.append(gun_feature_tensor)
-            print('cccccc', hand_tensors)
+            # print('cccccc', hand_tensors)
 
             gun_data = torch.cat(hand_tensors, dim=0)
             gun_data = gun_data.unsqueeze(0)
-            print(gun_data)
-            print(gun_data.shape)
+            # print(gun_data)
+            # print(gun_data.shape)
 
 
             # transform binary pose image to tensor
@@ -210,9 +218,9 @@ def process_frame(frame_number):
             # input_image = torch.tensor(numpy_image).clone().detach()
             input_image = input_image.unsqueeze(0)
             pose_data = input_image
-            # input('...')
+            # input('press enter to continue...')
 
-            print("person data:")
+            # print("person data:")
             # print("gun data:" , gun_data.size())
             # print("pose data:", pose_data.size())
             # print("gun data:" , gun_data)
@@ -252,13 +260,18 @@ def process_frame(frame_number):
                 predicted_label = predicted_label.item()
 
             print("PREDICTED LABEL of person ", person_id, " at frame ", frame_number, ": ", predicted_label)
-
+            global predictions
+            predictions[f'{person_id}'] = (neck_kp['x'], neck_kp['y'] - (neck_kp['neck_dist'] / 1.6), "GUN FOUND" if predicted_label == 1 else "NO GUN") # <person_id>: (<x>, <y>, <neck_dist>, <prediction>)
+            # input('press enter to continue...')
 
     return canvas
 
 num_frames = len(image_files)
 
 processed_frame_0 = False
+
+# Create the animation
+fig, ax = plt.subplots()
 
 # Create a function to update the animation
 def update(frame):
@@ -272,18 +285,31 @@ def update(frame):
         processed_frame_0 = True
     else:
         if frame > 0:
+            global predictions
             # Process other frames
             plt.clf()  # Clear the previous frame
+            predictions = {} # Clear previous frame predictions
             current_frame = process_frame(frame)
             plt.imshow(current_frame[:, :, [2, 1, 0]])  # Display the current frame
             plt.axis('off')
             plt.title(f'Frame {frame}')
+
+            # Show predictions per frame
+            for key, (x, y, pred) in predictions.items():
+                
+                plt.text(x-1, y, f"person_{key}: {pred}", color='black', fontsize=14, ha='center', fontweight='bold')
+                plt.text(x+1, y, f"person_{key}: {pred}", color='black', fontsize=14, ha='center', fontweight='bold')
+                plt.text(x, y-1, f"person_{key}: {pred}", color='black', fontsize=14, ha='center', fontweight='bold')
+                plt.text(x, y+1, f"person_{key}: {pred}", color='black', fontsize=14, ha='center', fontweight='bold')
+
+                plt.text(x, y, f"person_{key}: {pred}", color='yellow', fontsize=14, ha='center', fontweight='bold')
+
             if frame == num_frames - 1:
                 plt.close()
                 cv2.destroyAllWindows()
 
-# Create the animation
-fig, ax = plt.subplots()
+
+
 ani = FuncAnimation(fig, update, frames=num_frames, repeat=False)
 
 # Display the animation
