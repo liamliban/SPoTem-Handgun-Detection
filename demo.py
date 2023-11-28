@@ -143,8 +143,38 @@ def process_frame(frame_number):
             if hand_region_image is not None:
                 cv2.imshow("hand region image", hand_region_image)
 
+                # Load the image as a numpy array
+                hand_region_image = cv2.cvtColor(hand_region_image, cv2.COLOR_BGR2RGB)
+
+                original_height, original_width = hand_region_image.shape[:2]
+
+                target_width = 416
+
+                # Calculate the scaling factor for the width to make it 416
+                scale_factor = target_width / original_width
+                scaled_image = cv2.resize(hand_region_image, (target_width, int(original_height * scale_factor)))
+
+                # Calculate the necessary padding for height
+                original_height, original_width = scaled_image.shape[:2]
+                target_height = 416
+
+                padding_height = max(target_height - original_height, 0)
+
+                # Calculate the top and bottom padding dimensions
+                top = padding_height // 2
+                bottom = padding_height - top
+
+                # Pad the image to achieve the final size of 416x416
+                padded_image = cv2.copyMakeBorder(scaled_image, top, bottom, 0, 0, cv2.BORDER_CONSTANT, value=(0, 0, 0))
+
+
+                # TEMPORARY: resize the image to 224
+                padded_image = cv2.resize(padded_image, (224,224))
+
+
+
                 preprocess = transforms.Compose([ transforms.ToTensor() ])
-                input_image = preprocess(hand_region_image)
+                input_image = preprocess(padded_image)
                 input_image = input_image.unsqueeze(0)
 
                 # get hand feature by darknet53
@@ -171,6 +201,7 @@ def process_frame(frame_number):
             pose_data = input_image
 
             print("person data:")
+            print("hand tensors:",hand_tensors)
             # print("gun data:" , gun_data.size())
             # print("pose data:", pose_data.size())
             # print("gun data:" , gun_data)
