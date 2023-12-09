@@ -102,10 +102,7 @@ def create_data(dataset_folder, video_label, data_folder, display_animation = Fa
             'frame_number': frame_number,
             'keypoints': []
         }
-        normalized_keypoints_per_frame = {
-            'frame_number': frame_number,
-            'keypoints': []
-        }
+        normalized_keypoints_per_frame = []
 
         orig_hand_regions_per_frame = [] #[[person 0] , [person 1] ...]
 
@@ -147,7 +144,7 @@ def create_data(dataset_folder, video_label, data_folder, display_animation = Fa
 
             if keypoints is None:
                 # add None to normalized_keypoints_per_frame list
-                normalized_keypoints_per_frame['keypoints'].append({'person_id': person_id, 'keypoints': None})
+                normalized_keypoints_per_frame.append(None)
                 # add None to orig_hand_regions_per_frame list
                 orig_hand_regions_per_frame.append([None])
             else:    
@@ -185,7 +182,7 @@ def create_data(dataset_folder, video_label, data_folder, display_animation = Fa
                 normalized_keypoints, binary_file_name = BinaryPose.createBinaryPose(keypoints, frame_number, binary_folder)
 
                 # add normalized keypoints to normalized_keypoints_per_frame list
-                normalized_keypoints_per_frame['keypoints'].append(normalized_keypoints)
+                normalized_keypoints_per_frame.append(normalized_keypoints)
 
         keypoints_data.append(keypoints_per_frame)
         normalized_keypoints_data.append(normalized_keypoints_per_frame)

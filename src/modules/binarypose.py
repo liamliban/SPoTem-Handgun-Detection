@@ -150,10 +150,10 @@ class BinaryPose:
             # Print Log
             print(f'Binary Pose Image Save in: {file_name}')
 
-            keypoints['keypoints'] = kp # save the normalized pose keypoints
+            keypoints = kp # save the normalized pose keypoints
             return keypoints, file_name
         else:
-            keypoints['keypoints'] = kp # save the normalized pose keypoints
+            keypoints = kp # save the normalized pose keypoints
             if return_neck:
                 return image, { 'person_id': keypoints['person_id'],
                                 'x': cls.prev_x0,

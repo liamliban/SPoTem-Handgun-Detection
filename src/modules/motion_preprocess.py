@@ -21,9 +21,9 @@ class PersonIDNotFoundError(Exception):
 
 # Create file keypoints_seq_[person_id].txt which stores keypoints of frame per line with format
 # x0, y0, x1, y1 .... x17, y17
-def preprocess_data(keypoints_file_path, person_id, folder_path):  
+def preprocess_data(keypoints, person_id, folder_path):  
     null_value = 999
-    keypoints_sequence = _get_normalized(keypoints_file_path, person_id, null_value)
+    keypoints_sequence = _get_normalized(keypoints, person_id, null_value)
 
     file_path = _save_keypoints(keypoints_sequence, person_id, folder_path)
     return file_path
@@ -33,43 +33,26 @@ def _get_normalized(normalized_keypoints, person_id, null_value_kps = 999, null_
     keypoint_sequences = []
 
     for frame_data in normalized_keypoints: 
-        keypoints = frame_data.get("keypoints") #each frame data has "keypoints" (keypoints of all persons)
-
-        if len(keypoints) == 0: #if no person detected on the frame
-            keypoint_sequences.append([null_value_kps] * 36)
+        # print(frame_data)
+        if len(frame_data) < person_id+1:
+            keypoint_set = [null_value_person] * 36
         else:
-            keypoint_set = []
-
-            person_id_found = False
-            for person_data in keypoints: #check all persons in the frame
-                #if person id match, get keypoint set
-                if person_data.get("person_id") == person_id: 
-                    person_id_found = True
-                    person_keypoints = person_data.get("keypoints")
-
-                    if person_keypoints is not None:
-                        for keypoint in person_keypoints:
-                            x = keypoint.get("x")
-                            y = keypoint.get("y")
-                            if x is None:
-                                x = null_value_kps
-
-                            if y is None:
-                                y = null_value_kps
-
-                            keypoint_set.extend([x, y])
-                    else:
-                        keypoint_set = [null_value_person] * 36
-                    # print("keypoint set if yes: " , keypoint_set)
-                    
-                    break #stop looking for person id if already found
-
-            # if person id is not found, add null values
-            if not person_id_found:
+            person_keypoints = frame_data[person_id]
+            if person_keypoints is None:
                 keypoint_set = [null_value_person] * 36
+            else:
+                keypoint_set = []
+                for keypoint in person_keypoints:
+                    x = keypoint.get("x")
+                    y = keypoint.get("y")
+                    if x is None:
+                        x = null_value_kps
 
-                
-            keypoint_sequences.append(keypoint_set)
+                    if y is None:
+                        y = null_value_kps
+
+                    keypoint_set.extend([x, y])
+        keypoint_sequences.append(keypoint_set)
     return keypoint_sequences
 
 # takes a keypoints_sequence and save it into a text file
