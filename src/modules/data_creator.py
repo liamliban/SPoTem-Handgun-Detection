@@ -92,9 +92,6 @@ def create_data(dataset_folder, video_label, data_folder, display_animation = Fa
         candidate, subset = body_estimation(resized_image)
 
         num_person = len(subset)
-        # update max number of person in video
-        global total_num_person
-        total_num_person = max(total_num_person, num_person)
 
         # Visualize body pose on the image
         canvas = copy.deepcopy(resized_image)
@@ -131,6 +128,10 @@ def create_data(dataset_folder, video_label, data_folder, display_animation = Fa
 
         # update the previous persons for the next iteration
         prev_persons = arranged_persons
+
+        # update max number of person in video
+        global total_num_person
+        total_num_person = len(arranged_persons)
 
         for person_id in range(len(arranged_persons)):
             print("Person ID: ", person_id)
@@ -229,6 +230,7 @@ def create_data(dataset_folder, video_label, data_folder, display_animation = Fa
             
     else:
         for frame in range(num_frames):
+        # for frame in range(30):
             process_frame(frame)
         
     # # Save the keypoints data to a JSON file
