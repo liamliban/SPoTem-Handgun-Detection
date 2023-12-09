@@ -6,7 +6,7 @@ from src.modules import annotator
 
 # Choose dataset
 dataset_folder = 'raw_dataset/dataset/'
-video_name = "14"
+video_name = "16"
 
 # Folder where data are stored
 #   -gun: data/[video_label]/[person_id]/hand_image/
@@ -23,7 +23,7 @@ data_folder = f'./data/'
 #   -hand region images (gun), 
 #   -binary pose image (pose), 
 #   -preprocessed keypoints text file (motion)
-display_animation = False
+display_animation = True
 # Path of output video folder
 output_folder = data_folder + video_name + "/"
 

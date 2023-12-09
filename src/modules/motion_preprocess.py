@@ -43,7 +43,7 @@ def _get_normalized(normalized_keypoints, person_id, null_value):
             person_id_found = False
             for person_data in keypoints: #check all persons in the frame
                 #if person id match, get keypoint set
-                if person_data.get("person_id") == person_id: 
+                if person_data is not None and person_data.get("person_id") == person_id: 
                     person_id_found = True
                     person_keypoints = person_data.get("keypoints")
 

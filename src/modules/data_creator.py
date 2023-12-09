@@ -1,3 +1,4 @@
+import math
 import cv2
 import os
 import json
@@ -32,6 +33,9 @@ total_num_person = 0
 
 # total number of frames in video
 num_frames = 0
+
+# prev persons keypoints
+prev_persons = None
 
 # create the following data for a video:
 #   -hand region images (gun), 
@@ -87,9 +91,10 @@ def create_data(dataset_folder, video_label, data_folder, display_animation = Fa
         # Body pose estimation
         candidate, subset = body_estimation(resized_image)
 
+        num_person = len(subset)
         # update max number of person in video
         global total_num_person
-        total_num_person = max(total_num_person, len(subset))
+        total_num_person = max(total_num_person, num_person)
 
         # Visualize body pose on the image
         canvas = copy.deepcopy(resized_image)
@@ -107,53 +112,79 @@ def create_data(dataset_folder, video_label, data_folder, display_animation = Fa
 
         orig_hand_regions_per_frame = [] #[[person 0] , [person 1] ...]
 
-        for person_id in range(len(subset)):
+        # Get all person keypoints in the frame (unarranged)
+        unarranged_persons = []
+        confidence_min = 0.1
+        for person_id in range(num_person):
+            keypoints = bodykeypoints.extract_keypoints(person_id, candidate, subset, confidence_min)
+            unarranged_persons.append(keypoints)
+
+        
+        global prev_persons
+        if prev_persons is None:
+            # No rearranging in the first frame
+            arranged_persons = unarranged_persons
+        else:
+            arranged_persons = reorder_persons(prev_persons,unarranged_persons)
+
+        
+
+        # update the previous persons for the next iteration
+        prev_persons = arranged_persons
+
+        for person_id in range(len(arranged_persons)):
             print("Person ID: ", person_id)
 
             person_folder = output_folder + "person_" + str(person_id) + "/"
 
-            confidence_min = 0.1
             # extract keypoints dictionary (person_id,keypoints)
-            keypoints = bodykeypoints.extract_keypoints(person_id, candidate, subset, confidence_min)
-
-            # plot keypoints
-            bodykeypoints.plot_keypoints(canvas,keypoints)
+            # keypoints = bodykeypoints.extract_keypoints(person_id, candidate, subset, confidence_min)
+            keypoints = arranged_persons[person_id]
 
             # add keypoints to keypoints_per_frame list
             keypoints_per_frame['keypoints'].append(keypoints)
 
-            # get box coordinates of hand regions
-            hand_intersect_threshold = 0.9
-            hand_regions = handregion.extract_hand_regions(keypoints, hand_intersect_threshold)
-            print("Hand regions of resized image: ", hand_regions)
-            
-            # get the coordiantes of hand regions for the original image
-            orig_hand_regions = handregion.get_orig_hand_regions(orig_image_shape, resized_image_shape, hand_regions)
-            print("Hand region of original image: ", orig_hand_regions)
+            if keypoints is None:
+                # add None to normalized_keypoints_per_frame list
+                normalized_keypoints_per_frame['keypoints'].append(None)
+                # add None to orig_hand_regions_per_frame list
+                orig_hand_regions_per_frame.append([None])
+            else:    
+                # plot keypoints
+                bodykeypoints.plot_keypoints(canvas,keypoints)
 
-            orig_hand_regions_per_frame.append(orig_hand_regions)
+                # get box coordinates of hand regions
+                hand_intersect_threshold = 0.9
+                hand_regions = handregion.extract_hand_regions(keypoints, hand_intersect_threshold)
+                print("Hand regions of resized image: ", hand_regions)
+                
+                # get the coordiantes of hand regions for the original image
+                orig_hand_regions = handregion.get_orig_hand_regions(orig_image_shape, resized_image_shape, hand_regions)
+                print("Hand region of original image: ", orig_hand_regions)
 
-            # draw hand regions on canvas
-            handregion.draw_hand_regions(canvas, hand_regions)
+                orig_hand_regions_per_frame.append(orig_hand_regions)
 
-            # create and save concatenated hand region image
-            hand_image_width = 256
-            
-            # hand image filename : hands_{frame_number}.png
-            hand_folder = person_folder + "hand_image/"
-            handregion_image, hand_file_name = handimage.create_hand_image(resized_image, hand_regions, resized_image_shape, hand_image_width, frame_number, hand_folder)
-            
+                # draw hand regions on canvas
+                handregion.draw_hand_regions(canvas, hand_regions)
 
-            # display the hand region image
-            if display_animation and handregion_image is not None:
-                cv2.imshow("hand region image", handregion_image)
+                # create and save concatenated hand region image
+                hand_image_width = 256
+                
+                # hand image filename : hands_{frame_number}.png
+                hand_folder = person_folder + "hand_image/"
+                handregion_image, hand_file_name = handimage.create_hand_image(resized_image, hand_regions, resized_image_shape, hand_image_width, frame_number, hand_folder)
+                
 
-            # create and save the binary pose image
-            binary_folder = person_folder + "binary_pose/"
-            normalized_keypoints, binary_file_name = BinaryPose.createBinaryPose(keypoints, frame_number, binary_folder)
+                # display the hand region image
+                if display_animation and handregion_image is not None:
+                    cv2.imshow("hand region image", handregion_image)
 
-            # add normalized keypoints to normalized_keypoints_per_frame list
-            normalized_keypoints_per_frame['keypoints'].append(normalized_keypoints)
+                # create and save the binary pose image
+                binary_folder = person_folder + "binary_pose/"
+                normalized_keypoints, binary_file_name = BinaryPose.createBinaryPose(keypoints, frame_number, binary_folder)
+
+                # add normalized keypoints to normalized_keypoints_per_frame list
+                normalized_keypoints_per_frame['keypoints'].append(normalized_keypoints)
 
         keypoints_data.append(keypoints_per_frame)
         normalized_keypoints_data.append(normalized_keypoints_per_frame)
@@ -242,3 +273,71 @@ def get_num_frames_person(data_folder, video_name):
     num_persons = columns - 1
 
     return num_frames, num_persons
+
+# Calculate the average distance of two keypoints set
+def distance_of_persons(p1, p2):
+    kps1 = p1['keypoints']
+    kps2 = p2['keypoints']
+
+    sum_distance = 0
+    match_ctr = 0
+
+    for i in range(18):
+        kp1 = kps1[i]
+        kp2 = kps2[i]
+
+        x1 = kp1['x']
+        y1 = kp1['y']
+        x2 = kp2['x']
+        y2 = kp2['y']
+
+        if kp1['confidence'] > 0 and kp2['confidence'] > 0:
+            distance = math.sqrt((x2 - x1)**2 + (y2 - y1)**2)
+            sum_distance += distance
+            match_ctr += 1
+    if match_ctr == 0:
+        ave_distance = float('inf')
+    else:
+        ave_distance = sum_distance / match_ctr
+
+    return ave_distance
+
+
+# Arranged the current list of persons to match the previous list
+def reorder_persons(prev_persons, current_persons):
+    reordered_persons = [None] * len(prev_persons)
+    # initialize list to contain all possible pairs of a prev and current person
+    person_pairs = [] # (distance, prev_id, current_id)
+
+    # store all possible pairs
+    for prev_id in range(len(prev_persons)):
+        for current_id in range(len(current_persons)):
+            prev_person = prev_persons[prev_id]
+            current_person = current_persons[current_id]
+            if prev_person is not None and current_person is not None:
+                distance = distance_of_persons(prev_person, current_person)
+
+                pair = (distance, prev_id, current_id)
+                person_pairs.append(pair)
+        
+    # sort the pairs from shortest distance to longest
+    person_pairs = sorted(person_pairs, key=lambda x: x[0])
+
+    for pair in person_pairs:
+        prev_id = pair[1]
+        current_id = pair[2]
+
+        if prev_persons[prev_id] is not None and current_persons[current_id] is not None:
+            # Place the current person at the same position as its paired previous person
+            reordered_persons[prev_id] = current_persons[current_id]
+
+            # Removed the used persons
+            prev_persons[prev_id] = None
+            current_persons[current_id] = None
+    
+    # For all unmatched current persons, add them as a new person id
+    for person in current_persons:
+        if person is not None:
+            reordered_persons.append(person)
+
+    return reordered_persons
