@@ -147,7 +147,7 @@ def create_data(dataset_folder, video_label, data_folder, display_animation = Fa
 
             if keypoints is None:
                 # add None to normalized_keypoints_per_frame list
-                normalized_keypoints_per_frame['keypoints'].append(None)
+                normalized_keypoints_per_frame['keypoints'].append({'person_id': person_id, 'keypoints': None})
                 # add None to orig_hand_regions_per_frame list
                 orig_hand_regions_per_frame.append([None])
             else:    
