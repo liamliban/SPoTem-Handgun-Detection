@@ -19,26 +19,49 @@ import itertools
 device = 'cuda:0' if torch.cuda.is_available() else 'cpu'
 print("Device: " , device)
 
-test_fold = 5
+def plot_confusion_matrix(matrix, classes, title, path):
+    """
+    Plot and save the confusion matrix as an image.
+    """
+    plt.figure(figsize=(len(classes) + 2, len(classes) + 2))
+    plt.imshow(matrix, interpolation='nearest', cmap=plt.cm.Blues)
+    plt.title(title, fontsize=14)
+    plt.colorbar()
+    tick_marks = np.arange(len(classes))
+    plt.xticks(tick_marks, classes, rotation=45, fontsize=12)
+    plt.yticks(tick_marks, classes, fontsize=12)
 
-# Change Checkpoint File Location here
-root_folder = f'logs/Cross Validation GPM1/fold{test_fold}'
-checkpoint_path = f'{root_folder}/model/model_epoch_59.pt'
-print('/'.join(checkpoint_path.split("/")[:-2]))
+    fmt = 'd'
+    thresh = matrix.max() / 2.
+    for i, j in itertools.product(range(matrix.shape[0]), range(matrix.shape[1])):
+        plt.text(j, i, format(matrix[i, j], fmt),
+                 horizontalalignment="center",
+                 color="white" if matrix[i, j] > thresh else "black",
+                 fontsize=10)
 
-checkpoint = torch.load(checkpoint_path) 
+    plt.ylabel('True label', fontsize=14)
+    plt.xlabel('Predicted label', fontsize=14)
+    plt.tight_layout()
+    plt.savefig(path)
+    print(f'Confusion Matrix Saved To: {path}')
+    plt.close()
 
+# VALUES TO CHANGE:
+root_folder = f'logs/Cross Validation GPM1'
+root_dir = 'data2'
+
+print(f'Root Folder: {root_folder}')
+print(f'Data Folder: {root_dir}')
+
+checkpoint_path = f'{root_folder}/fold1/model/model_epoch_59.pt' # use fold 1 to get hyperparams
+checkpoint = torch.load(checkpoint_path)
 hidden_size = checkpoint['model_info']['hidden_size']
 window_size = checkpoint['model_info']['window_size']
 lstm_layers = checkpoint['model_info']['lstm_layers']
 model_type = checkpoint['model_info']['model_type']
-print(model_type)
-# Load Model and Data Based on Model Type
-darknet_model = darknet53(pretrained=True)
-pose_model = poseCNN()
+print(f'Model Type: {model_type}')
 
 # LOAD DATA
-root_dir = 'data'
 if model_type == 'GPM':
     custom_dataset = CustomGunDataset(root_dir=root_dir, window_size = window_size)
 elif model_type == 'GPM2':
@@ -55,8 +78,14 @@ else:
 folds = 5
 kf = KFold(n_splits=folds, random_state=42, shuffle=True)
 for fold_num, (_, val_indices) in enumerate(kf.split(custom_dataset)):
-    if fold_num+1 != 5: 
-        continue
+
+    # Reload model per fold
+    checkpoint_path = f'{root_folder}/fold{fold_num+1}/model/model_epoch_59.pt' # do not change
+    checkpoint = torch.load(checkpoint_path)
+
+    # Load Model and Data Based on Model Type
+    darknet_model = darknet53(pretrained=True)
+    pose_model = poseCNN()
 
     # LOAD MODEL
     if model_type == 'GPM':
@@ -101,7 +130,7 @@ for fold_num, (_, val_indices) in enumerate(kf.split(custom_dataset)):
     targets = []
     with torch.no_grad():
         for index, video in enumerate(video_loader):
-            print(f'Predicting...[{index}/{len(video_loader)}]', end='\r')
+            print(f'Predicting Fold {fold_num+1}...[{index}/{len(video_loader)}]', end='\r')
             data_name, gun_data, pose_data, motion_data, target_label = video
 
             gun_data = gun_data.to(device)
@@ -122,11 +151,13 @@ for fold_num, (_, val_indices) in enumerate(kf.split(custom_dataset)):
             predictions.append(predicted_label.item())
             targets.append(target_label.item())
 
-        print(f'Predicting...[{len(video_loader)}/{len(video_loader)}]')
-        val_confusion_matrix = confusion_matrix(targets, predictions)
+        print(f'Predicting Fold {fold_num+1}...[{len(video_loader)}/{len(video_loader)}]')
+    
+    val_confusion_matrix = confusion_matrix(targets, predictions)
+    plot_confusion_matrix(val_confusion_matrix, classes=['0', '1'], title=f'{model_type} Test Matrix', path=f'{root_folder}/fold{fold_num+1}/fold{fold_num+1}_val_confusion_matrix.png')
 
     # SAVE INCORRECT PREDICTIONS
-    incorrect_predictions_path = f'{root_folder}/IncorrectPredictions.txt'
+    incorrect_predictions_path = f'{root_folder}/fold{fold_num+1}/TestIncorrectPredictions.txt'
     with open(incorrect_predictions_path, 'w') as file:
         file.write('Incorrect Predictions:\n\n')
         for item in incorrect_predictions:
@@ -138,33 +169,3 @@ for fold_num, (_, val_indices) in enumerate(kf.split(custom_dataset)):
             file.write(f'  Predicted Label: {item["predicted_label"]}\n')
             file.write(f'  Correct Label: {item["target_label"]}\n\n')
         print(f'Incorrect Predictions saved to: {incorrect_predictions_path}')
-
-    def plot_confusion_matrix(matrix, classes, title, path):
-        """
-        Plot and save the confusion matrix as an image.
-        """
-        plt.figure(figsize=(len(classes) + 2, len(classes) + 2))
-        plt.imshow(matrix, interpolation='nearest', cmap=plt.cm.Blues)
-        plt.title(title, fontsize=14)
-        plt.colorbar()
-        tick_marks = np.arange(len(classes))
-        plt.xticks(tick_marks, classes, rotation=45, fontsize=12)
-        plt.yticks(tick_marks, classes, fontsize=12)
-
-        fmt = 'd'
-        thresh = matrix.max() / 2.
-        for i, j in itertools.product(range(matrix.shape[0]), range(matrix.shape[1])):
-            plt.text(j, i, format(matrix[i, j], fmt),
-                     horizontalalignment="center",
-                     color="white" if matrix[i, j] > thresh else "black",
-                     fontsize=10)
-
-        plt.ylabel('True label', fontsize=14)
-        plt.xlabel('Predicted label', fontsize=14)
-        plt.tight_layout()
-
-        plt.savefig(path)
-        plt.close()
-
-    # SAVE CONFUSION MATRIX
-    plot_confusion_matrix(val_confusion_matrix, classes=['0', '1'], title=f'{model_type} Test Matrix', path=f'{root_folder}/fold{fold_num+1}_val_confusion_matrix.png')
