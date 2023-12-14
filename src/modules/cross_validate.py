@@ -23,6 +23,33 @@ torch.backends.cudnn.enabled = False
 
 torch.backends.cudnn.deterministic=True
 
+def plot_confusion_matrix(matrix, classes, title, path):
+    """
+    Plot and save the confusion matrix as an image.
+    """
+    plt.figure(figsize=(len(classes) + 2, len(classes) + 2))
+    plt.imshow(matrix, interpolation='nearest', cmap=plt.cm.Blues)
+    plt.title(title, fontsize=14)
+    plt.colorbar()
+    tick_marks = np.arange(len(classes))
+    plt.xticks(tick_marks, classes, rotation=45, fontsize=12)
+    plt.yticks(tick_marks, classes, fontsize=12)
+
+    fmt = 'd'
+    thresh = matrix.max() / 2.
+    for i, j in itertools.product(range(matrix.shape[0]), range(matrix.shape[1])):
+        plt.text(j, i, format(matrix[i, j], fmt),
+                 horizontalalignment="center",
+                 color="white" if matrix[i, j] > thresh else "black",
+                 fontsize=10)
+
+    plt.ylabel('True label', fontsize=14)
+    plt.xlabel('Predicted label', fontsize=14)
+    plt.tight_layout()
+
+    plt.savefig(path)
+    plt.close()
+
 def cross_validate( user_input, 
                     train_loader, 
                     val_loader, 
@@ -242,6 +269,10 @@ def cross_validate( user_input,
     # Save the results to Excel with run number and date
     if save_excel:
         write_results_to_excel(excel_filename, run_number, current_datetime, user_input, num_epochs, train_accuracy, train_precision, train_recall, train_f1_score, val_accuracy, val_precision, val_recall, val_f1_score, train_losses, val_losses)
+
+    # Display and save confusion matrices as images
+    plot_confusion_matrix(train_confusion_matrix, classes=['0', '1'], title=f'Training Matrix', path=f'{log_folder}train_confusion_matrix_epoch_{epoch+1}.png')
+    plot_confusion_matrix(val_confusion_matrix, classes=['0', '1'], title=f'Test Matrix', path=f'{log_folder}val_confusion_matrix_epoch_{epoch+1}.png')
 
     return run_number, combined_model, train_losses, val_losses
 

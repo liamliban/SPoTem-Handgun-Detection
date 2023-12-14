@@ -42,6 +42,10 @@ prev_persons = None
 #   -binary pose image (pose), 
 #   -preprocessed keypoints text file (motion)
 def create_data(dataset_folder, video_label, data_folder, display_animation = False):
+    # Reset prev_persons for each new video folder
+    global prev_persons
+    prev_persons = None
+    
     # Path of input video
     video_folder = dataset_folder + video_label
 
