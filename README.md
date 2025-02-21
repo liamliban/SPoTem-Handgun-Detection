@@ -1,3 +1,5 @@
+# This project was my thesis study published in the ICIAI 2024: Proceedings of the 2024 International Conference on Innovation in Artificial Intelligence. It was conducted in collaboration with my thesis partners—Juan Miguel Flores, Robert Ribaya, and Idan Paguio—under the guidance of our adviser, Jessie James Suarez.
+
 ## pytorch-openpose
 
 pytorch implementation of [openpose](https://github.com/CMU-Perceptual-Computing-Lab/openpose) including **Body and Hand Pose Estimation**, and the pytorch model is directly converted from [openpose](https://github.com/CMU-Perceptual-Computing-Lab/openpose) caffemodel by [caffemodel2pytorch](https://github.com/vadimkantorov/caffemodel2pytorch). You could implement face keypoint detection in the same way if you are interested in. Pay attention to that the face keypoint detector was trained using the procedure described in [Simon et al. 2017] for hands.
