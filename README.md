@@ -1,4 +1,4 @@
-# This project was my thesis study published in the ICIAI 2024: Proceedings of the 2024 International Conference on Innovation in Artificial Intelligence. It was conducted in collaboration with my thesis partners—Juan Miguel Flores, Robert Ribaya, and Idan Paguio—under the guidance of our adviser, Jessie James Suarez.
+## This project was my thesis study published in the ICIAI 2024: Proceedings of the 2024 International Conference on Innovation in Artificial Intelligence. It was conducted in collaboration with my thesis partners—Juan Miguel Flores, Robert Ribaya, and Idan Paguio—under the guidance of our adviser, Jessie James Suarez.
 
 ## pytorch-openpose
 
